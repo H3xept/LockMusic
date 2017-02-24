@@ -3,6 +3,8 @@
 #include "./tools/LLIPC.h"
 #include "./tools/LLLog.h"
 
+#define LOG(X) LLLogPrint((char *)X);
+
 %hook SBLockHardwareButton
 -(void)singlePress:(id)arg1
 {
