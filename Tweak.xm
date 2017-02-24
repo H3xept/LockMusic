@@ -25,6 +25,8 @@
 @end
 @interface MusicArtworkView:UIView
 @end
+@interface MPUTransportControlsView:UIView
+@end
 
 %hook MPUNowPlayingArtworkView
 - (void)setFrame:(CGRect)frame{
@@ -44,6 +46,7 @@
 }
 %end
 
+
 %hook MPULockScreenMediaControlsView
 
 -(void)layoutSubviews{
@@ -52,14 +55,30 @@
 	UIView* volumeView = MSHookIvar<MPUMediaControlsVolumeView *>(self, "_volumeView");
 	UIView* timeView = MSHookIvar<MPUChronologicalProgressView *>(self, "_timeView");
 	UIView* titlesView = MSHookIvar<MPUMediaControlsTitlesView *>(self, "_titlesView");
+	UIView* transportControls = MSHookIvar<MPUTransportControlsView *>(self, "_transportControls");
+
 	CGRect newVolumeRect = volumeView.frame;
 	newVolumeRect.origin.y = [UIScreen mainScreen].bounds.size.height+100;
 	CGRect newTimeRect = timeView.frame;
-	newTimeRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-50;
+	newTimeRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-100;
 	CGRect newTitlesRect = titlesView.frame;
-	newTitlesRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-100;
+	CGRect newControlsRect = transportControls.frame;
+	newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-100;
+	transportControls.frame = newControlsRect;
+	newTitlesRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-120-50;
 	volumeView.frame = newVolumeRect;
 	timeView.frame = newTimeRect;
 	titlesView.frame = newTitlesRect;
+}
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+	UIView* transportControls = MSHookIvar<MPUTransportControlsView *>(self, "_transportControls");
+
+    CGPoint pointInControls = [transportControls convertPoint:point fromView:self];
+
+    if (CGRectContainsPoint(transportControls.bounds, pointInControls)) {
+        return [transportControls hitTest:pointInControls withEvent:event];
+    }
+    return %orig(point,event);
 }
 %end
