@@ -29,19 +29,34 @@
 {
 	%orig;
 	MPUNowPlayingArtworkView* artworkView = MSHookIvar<MPUNowPlayingArtworkView *>(self, "_artworkView");
+	id delegate = MSHookIvar<id>(self, "_delegate");
+	LOG([[delegate description] UTF8String]);
 	CGRect newArtworkFrame = artworkView.frame;
 	newArtworkFrame.origin.y = 0;
 	artworkView.frame = newArtworkFrame;
 	const char* str = [[NSString stringWithFormat:@"%f",artworkView.alpha] UTF8String];
 	LOG(str);
+	artworkView.alpha = 1.0f;
 }
 
-%end
 
+%end
+%hook MPUNowPlayingArtworkView
+- (void)setAlpha:(double)arg1{
+	%orig(1.0);
+}
+%end
 @interface MusicArtworkView:UIView
 @end
 
+%hook SBDashBoardMediaControlsViewController
+-(void)mediaControlsViewController:(id)arg1 didReceiveInteractionEvent:(id)arg2{
+	%orig(arg1,arg2);
+	LOG("DELEGATE");
+}
+%end
 %hook MPULockScreenMediaControlsView
+
 -(void)layoutSubviews{
 	%orig;
 
