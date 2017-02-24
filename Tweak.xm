@@ -23,38 +23,27 @@
 @end
 @interface MPUNowPlayingArtworkView:UIView
 @end
-%hook MPULockScreenMediaControlsViewController
-
--(void)viewWillLayoutSubviews
-{
-	%orig;
-	MPUNowPlayingArtworkView* artworkView = MSHookIvar<MPUNowPlayingArtworkView *>(self, "_artworkView");
-	id delegate = MSHookIvar<id>(self, "_delegate");
-	LOG([[delegate description] UTF8String]);
-	CGRect newArtworkFrame = artworkView.frame;
-	newArtworkFrame.origin.y = 0;
-	artworkView.frame = newArtworkFrame;
-	const char* str = [[NSString stringWithFormat:@"%f",artworkView.alpha] UTF8String];
-	LOG(str);
-	artworkView.alpha = 1.0f;
-}
-
-
-%end
-%hook MPUNowPlayingArtworkView
-- (void)setAlpha:(double)arg1{
-	%orig(1.0);
-}
-%end
 @interface MusicArtworkView:UIView
 @end
 
-%hook SBDashBoardMediaControlsViewController
--(void)mediaControlsViewController:(id)arg1 didReceiveInteractionEvent:(id)arg2{
-	%orig(arg1,arg2);
-	LOG("DELEGATE");
+%hook MPUNowPlayingArtworkView
+- (void)setFrame:(CGRect)frame{
+	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
+		CGRect rc = CGRectMake(0,0,100,100);
+		%orig(rc);
+		return;
+	}
+	%orig(frame);
+}
+- (void)setAlpha:(double)alpha{
+	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
+		%orig(1.0);
+		return;
+	}
+	%orig(alpha);
 }
 %end
+
 %hook MPULockScreenMediaControlsView
 
 -(void)layoutSubviews{
@@ -72,15 +61,5 @@
 	volumeView.frame = newVolumeRect;
 	timeView.frame = newTimeRect;
 	titlesView.frame = newTitlesRect;
-}
-%end
-%hook MPULockScreenMediaControlsViewController
--(void)viewDidLoad{
-	%orig;
-
-	UIView* artWork = MSHookIvar<UIView *>(self, "_artworkView");
-	CGRect newArtworkRect = artWork.frame;
-	newArtworkRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-70-200;
-	artWork.frame = newArtworkRect;
 }
 %end
