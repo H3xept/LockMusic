@@ -11,8 +11,40 @@
 #define LOG(X)
 #endif
 
+static NSMutableDictionary *preferences = nil;
+static CFStringRef applicationID = (__bridge CFStringRef)@"com.fl00d.lockmusicprefs";
+
+static void LoadPreferences() {
+    if (CFPreferencesAppSynchronize(applicationID)) {
+        CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+        if (keyList) {
+            preferences = [(NSDictionary *)CFPreferencesCopyMultiple(keyList, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost) mutableCopy];
+            CFRelease(keyList);
+        }
+    }
+}
+
 %ctor{
 	assert(lllog_register_service("net.jndok.logserver") == 0);
+
+	static dispatch_once_t onceToken;
+
+	dispatch_once(&onceToken, ^{
+
+	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
+                                    NULL,
+	                              	(CFNotificationCallback)LoadPreferences,
+	                               	(__bridge CFStringRef)@"LockMusicPreferencesChangedNotification",
+	                               	NULL,
+	                               	CFNotificationSuspensionBehaviorDeliverImmediately);
+	        LoadPreferences();
+	    });
+
+}
+
+BOOL isEnabled(void)
+{
+	return (preferences) ? [preferences[@"kEnabled"] boolValue] : NO;
 }
 
 @interface SBDashBoardMediaArtworkViewController:UIViewController
