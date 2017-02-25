@@ -43,6 +43,7 @@
 @property (nonatomic) CGRect previousTimeRect;
 @property (nonatomic) CGRect previousControlsRect;
 @property (nonatomic) CGRect previousTitleRect;
+@property (nonatomic) CGRect previousArtworkRect;
 @end
 
 @implementation AspectController
@@ -71,19 +72,16 @@ MPUNowPlayingArtworkView* artwork = nil;
 - (void)setFrame:(CGRect)frame{
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
 		if(!artwork) artwork = self;
+		CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
-			CGRect rc = frame;
 			rc.origin = CGPointMake(20,20);
-			rc.size = CGSizeMake(110,110);
-			%orig(rc);
-			return;
+			rc.size = CGSizeMake(120,120);
 		}else{
-			CGRect rc = frame;
 			rc.origin.y -= frame.size.height/2 + 30;
-			%orig(rc);
-			return;
 		}
-
+		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y)return;
+		else %orig(rc);
+		[AspectController sharedInstance].previousArtworkRect = rc;
 		return;
 	}
 	%orig(frame);
@@ -144,14 +142,13 @@ MPUNowPlayingArtworkView* artwork = nil;
 
 	if([AspectController sharedInstance].notificationsPresent){
 		newVolumeRect.origin.y = -100;
-		newTimeRect.origin.y = 120;
-		newTitlesRect.origin.y = 20;
-		newTitlesRect.origin.x = newTitlesRect.size.width/2-10;
-		newTitlesRect.size.width /= 2;
-		newTitlesRect.size.width += 20;
-		newControlsRect.origin.y = 70;
-		newControlsRect.origin.x = (newControlsRect.size.width*3)/4;
-		newControlsRect.size.width = (newControlsRect.size.width*4)/5;
+		newTimeRect.origin.y = 160;
+		newTitlesRect.origin.y = 30;
+		newTitlesRect.origin.x = 120+10;
+		newTitlesRect.size.width = [UIScreen mainScreen].bounds.size.width-120-40;
+		newControlsRect.origin.y = 90;
+		newControlsRect.size.width = newTitlesRect.size.width-20;
+		newControlsRect.origin.x = [UIScreen mainScreen].bounds.size.width-(newTitlesRect.size.width/2 + newControlsRect.size.width/2 + 30);
 	}else{
 		newVolumeRect.origin.y = [UIScreen mainScreen].bounds.size.height+100;
 		newTimeRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-100;
