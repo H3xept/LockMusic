@@ -168,8 +168,6 @@ MPUNowPlayingArtworkView* artwork = nil;
 - (void)drawRect:(CGRect)rect{
 	%orig(rect);
 
-static dispatch_once_t onceToken;
-
 #define belloColor [UIColor colorWithRed:1.00 green:0.18 blue:0.33 alpha:1.0]
     
 	    UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
