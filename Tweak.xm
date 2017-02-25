@@ -72,12 +72,21 @@ BOOL isEnabled(void)
 @interface NCNotificationListViewController:UICollectionViewController
 @end
 
+@interface SBMediaController:NSObject
++(id)sharedInstance;
+-(BOOL)likeTrack;
+-(BOOL)banTrack;
+- (id)_nowPlayingInfo;
+-(BOOL)changeTrack:(int)arg1;
+@end
+
 @interface AspectController : NSObject
 @property (nonatomic) BOOL notificationsPresent;
 @property (nonatomic) CGRect previousTimeRect;
 @property (nonatomic) CGRect previousControlsRect;
 @property (nonatomic) CGRect previousTitleRect;
 @property (nonatomic) CGRect previousArtworkRect;
+@property (nonatomic,strong) UIButton* button;
 @end
 
 @implementation AspectController
@@ -140,17 +149,6 @@ MPUNowPlayingArtworkView* artwork = nil;
 }
 %end
 
-
-// NSString *string = @"AYyy";
-
-// UIActivityViewController *activityViewController =
-//   [[UIActivityViewController alloc] initWithActivityItems:@[string]
-//                                     applicationActivities:nil];
-// [self presentViewController:activityViewController
-//                                       animated:YES
-//                                     completion:nil];
-
-UIButton *button = nil;
 %hook SBDashBoardView
 
 %new
@@ -164,12 +162,21 @@ UIButton *button = nil;
 
     }]];	
 
-    UIAlertAction* like = [UIAlertAction actionWithTitle:@"Like" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {}];
+	UIAlertAction* shuffle = [UIAlertAction actionWithTitle:@"Next shuffle track" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+		[[objc_getClass("SBMediaController") sharedInstance] changeTrack:6];
+	}];
+    [actionSheet addAction:shuffle];
+    
+    UIAlertAction* like = [UIAlertAction actionWithTitle:@"Like" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+		[[objc_getClass("SBMediaController") sharedInstance] likeTrack];
+    }];
     [like setValue:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth" ofType:@"png"]] forKey:@"image"];
     [like setValue:belloColor forKey:@"imageTintColor"];
     [actionSheet addAction:like];
 
-	UIAlertAction* dislike = [UIAlertAction actionWithTitle:@"Dislike" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {}];
+	UIAlertAction* dislike = [UIAlertAction actionWithTitle:@"Dislike" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+		[[objc_getClass("SBMediaController") sharedInstance] banTrack];
+	}];
     [dislike setValue:belloColor forKey:@"imageTintColor"];
     [dislike setValue:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Line" ofType:@"png"]] forKey:@"image"];
     [actionSheet addAction:dislike];
@@ -181,19 +188,18 @@ UIButton *button = nil;
 -(void)layoutSubviews{
 	%orig;
 
-	button = [UIButton buttonWithType:UIButtonTypeCustom];
+	UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
 	UIScrollView* scroll = MSHookIvar<UIScrollView *>(self, "_scrollView");
 	[button setImage:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Group" ofType:@"png"]] forState:UIControlStateNormal];
 	button.frame = CGRectMake([UIScreen mainScreen].bounds.size.width*2-(48), [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f);
 
 	button.contentMode = UIViewContentModeBottom;
-	// button.layer.masksToBounds = YES;
-	// button.alpha = .5f;
 	[scroll addSubview:button];
 	[button addTarget:self 
 	             action:@selector(musicButtonPressed) 
 	   forControlEvents:UIControlEventTouchUpInside];
 	button.hidden = YES;
+	[AspectController sharedInstance].button = button;
 }
 
 %end
@@ -206,9 +212,9 @@ UIButton *button = nil;
 -(void)nowPlayingController:(id)arg1 playbackStateDidChange:(BOOL)arg2{
 	%orig(arg1,arg2);
 	if(arg2){
-		button.hidden = NO;
+		[AspectController sharedInstance].button.hidden = NO;
 	}else{
-		button.hidden = YES;
+		[AspectController sharedInstance].button.hidden = YES;
 	}
 }
 %end
@@ -226,7 +232,6 @@ UIButton *button = nil;
 
 %new
 - (void)refreshDisposition{
-	LOG("Refreshing...");
 	[self layoutSubviews];
 }
 
@@ -300,11 +305,19 @@ UIButton *button = nil;
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+
 	UIView* transportControls = MSHookIvar<MPUTransportControlsView *>(self, "_transportControls");
     CGPoint pointInControls = [transportControls convertPoint:point fromView:self];
     if (CGRectContainsPoint(transportControls.bounds, pointInControls)) {
         return [transportControls hitTest:pointInControls withEvent:event];
     }
+
+	UIView* timeView = MSHookIvar<MPUTransportControlsView *>(self, "_timeView");
+    CGPoint pointInTime = [timeView convertPoint:point fromView:self];
+    if (CGRectContainsPoint(timeView.bounds, pointInTime)) {
+        return [timeView hitTest:pointInTime withEvent:event];
+    }
+
     return %orig(point,event);
 }
 
