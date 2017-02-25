@@ -7,7 +7,7 @@
 
 #ifdef __DBG__
 #define LOG(X) LLLogPrint((char *)X);
-#else 
+#else
 #define LOG(X)
 #endif
 
@@ -111,7 +111,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 - (instancetype)init{
 	id rt = %orig();
 	[[NSNotificationCenter defaultCenter] addObserver:rt
-	        selector:@selector(refreshDisposition) 
+	        selector:@selector(refreshDisposition)
 	        name:@"refresh.lock"
 	        object:nil];
 	return rt;
@@ -143,13 +143,13 @@ MPUNowPlayingArtworkView* artwork = nil;
 	AspectController* aspect = [AspectController sharedInstance];
 	BOOL rt = NO;
 	if(aspect.previousTimeRect.origin.y == timeView.frame.origin.y)rt=YES;
-	//Setup 
+	//Setup
 	timeView.frame = (aspect.previousTimeRect.size.width) ? aspect.previousTimeRect : timeView.frame;
 	transportControls.frame = (aspect.previousControlsRect.size.width) ? aspect.previousControlsRect : transportControls.frame;
 	titlesView.frame = (aspect.previousTitleRect.size.width) ? aspect.previousTitleRect : titlesView.frame;
 	// --
 	if(rt)return;
-	
+
 
 	if([AspectController sharedInstance].notificationsPresent){
 		newVolumeRect.origin.y = -100;
@@ -170,7 +170,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 
 	[artwork setFrame:CGRectZero];
 	[UIView setAnimationsEnabled:NO];
-	
+
 	timeView.alpha = .0f;
 	transportControls.alpha = .0f;
 	titlesView.alpha = .0f;
@@ -215,8 +215,8 @@ MPUNowPlayingArtworkView* artwork = nil;
 %hook NCNotificationListViewController
 -(void)collectionView:(id)arg1 performUpdatesAlongsideLayout:(id)arg2{
 	%orig(arg1,arg2);
-	[[NSNotificationCenter defaultCenter] 
-        postNotificationName:@"refresh.lock" 
+	[[NSNotificationCenter defaultCenter]
+        postNotificationName:@"refresh.lock"
         object:nil];
 }
 %end
