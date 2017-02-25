@@ -121,7 +121,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 			rc.origin = CGPointMake(20,40);
 			rc.size = CGSizeMake(120,120);
 		}else{
-			rc.origin.y -= frame.size.height/2 + 48;
+			rc.origin.y -= frame.size.height/2 + 68;
 		}
 		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
 			return;}
