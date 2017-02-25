@@ -71,10 +71,15 @@ MPUNowPlayingArtworkView* artwork = nil;
 
 - (void)setFrame:(CGRect)frame{
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
+	if(frame.size.height == 0){
+		LOG("Set frame ZEOR!");
+	}else{
+		LOG("PO");
+	}
 		if(!artwork) artwork = self;
 		CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
-			rc.origin = CGPointMake(20,40);
+			rc.origin = CGPointMake(10,40);
 			rc.size = CGSizeMake(120,120);
 		}else{
 			rc.origin.y -= frame.size.height/2 + 30;
@@ -145,11 +150,11 @@ MPUNowPlayingArtworkView* artwork = nil;
 		newVolumeRect.origin.y = -100;
 		newTimeRect.origin.y = 160;
 		newTitlesRect.origin.y = 30;
-		newTitlesRect.origin.x = 120+10;
+		newTitlesRect.origin.x = 120+10-5;
 		newTitlesRect.size.width = [UIScreen mainScreen].bounds.size.width-120-40;
 		newControlsRect.origin.y = 90;
 		newControlsRect.size.width = newTitlesRect.size.width-20;
-		newControlsRect.origin.x = [UIScreen mainScreen].bounds.size.width-(newTitlesRect.size.width/2 + newControlsRect.size.width/2 + 30);
+		newControlsRect.origin.x = [UIScreen mainScreen].bounds.size.width-(newTitlesRect.size.width/2 + newControlsRect.size.width/2 + 30+5);
 	}else{
 		newVolumeRect.origin.y = [UIScreen mainScreen].bounds.size.height+100;
 		newTimeRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-100;
