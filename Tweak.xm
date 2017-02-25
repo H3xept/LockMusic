@@ -102,6 +102,10 @@ MPUNowPlayingArtworkView* artwork = nil;
 %hook MPUNowPlayingArtworkView
 
 - (void)setFrame:(CGRect)frame{
+	if (!isEnabled()) {
+		%orig(frame);
+		return;
+	}
 
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
 		if(!artwork) artwork = self;
@@ -141,6 +145,10 @@ MPUNowPlayingArtworkView* artwork = nil;
 %hook MPULockScreenMediaControlsView
 
 - (instancetype)init{
+	if (!isEnabled()) {
+		return %orig();
+	}
+
 	id rt = %orig();
 	[[NSNotificationCenter defaultCenter] addObserver:rt
 	        selector:@selector(refreshDisposition)
@@ -157,6 +165,10 @@ MPUNowPlayingArtworkView* artwork = nil;
 
 -(void)layoutSubviews{
 	%orig;
+
+	if (!isEnabled()) {
+		return;
+	}
 
 	refreshNotificationStatus();
 
@@ -199,7 +211,6 @@ MPUNowPlayingArtworkView* artwork = nil;
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-150;
 	}
 
-
 	[artwork setFrame:CGRectZero];
 	[UIView setAnimationsEnabled:NO];
 
@@ -221,10 +232,13 @@ MPUNowPlayingArtworkView* artwork = nil;
 	aspect.previousTitleRect = titlesView.frame;
 	aspect.previousControlsRect = transportControls.frame;
 	aspect.previousTimeRect = timeView.frame;
-
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+	if (!isEnabled()) {
+		return %orig(point, event);
+	}
+
 	UIView* transportControls = MSHookIvar<MPUTransportControlsView *>(self, "_transportControls");
     CGPoint pointInControls = [transportControls convertPoint:point fromView:self];
     if (CGRectContainsPoint(transportControls.bounds, pointInControls)) {
@@ -238,6 +252,11 @@ MPUNowPlayingArtworkView* artwork = nil;
 %hook SBDashBoardNotificationListViewController
 -(void)loadView{
 	%orig();
+
+	if (!isEnabled()) {
+		return;
+	}
+
 	NCNotificationListViewController* listView = MSHookIvar<NCNotificationListViewController *>(self, "_listViewController");
 	if(![notificationController isEqual:listView])
 		notificationController = listView;
@@ -247,6 +266,11 @@ MPUNowPlayingArtworkView* artwork = nil;
 %hook NCNotificationListViewController
 -(void)collectionView:(id)arg1 performUpdatesAlongsideLayout:(id)arg2{
 	%orig(arg1,arg2);
+
+	if (!isEnabled()) {
+		return;
+	}
+
 	[[NSNotificationCenter defaultCenter]
         postNotificationName:@"refresh.lock"
         object:nil];
