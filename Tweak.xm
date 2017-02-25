@@ -71,27 +71,28 @@ MPUNowPlayingArtworkView* artwork = nil;
 
 - (void)setFrame:(CGRect)frame{
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
-		[UIView setAnimationsEnabled:NO];
-		if(!artwork) artwork = self;
-		CGRect rc = frame;
+	if(!artwork) artwork = self;
+	CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
 			rc.origin = CGPointMake(10,40);
 			rc.size = CGSizeMake(120,120);
 		}else{
 			rc.origin.y -= frame.size.height/2 + 30;
 		}
-		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
-			[UIView setAnimationsEnabled:YES];
+if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
 			return;}
-		else %orig(rc);
-		[AspectController sharedInstance].previousArtworkRect = rc;
-		[UIView setAnimationsEnabled:YES];
-		return;
+	[UIView animateWithDuration:.5 
+                 animations:^(){
+
+		%orig(rc);
 	}
+                 
+                 completion:^(BOOL finished){
+                 	[AspectController sharedInstance].previousArtworkRect = rc;
+                 }];return;
+}
 	if(frame.size.width != 0)
 		%orig(frame);
-	[UIView setAnimationsEnabled:YES];
-
 }
 - (void)setAlpha:(double)alpha{
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
