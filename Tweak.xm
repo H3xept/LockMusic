@@ -159,7 +159,6 @@ MPUNowPlayingArtworkView* artwork = nil;
 
 	dispatch_async(dispatch_get_main_queue(), ^{
 	[artwork setFrame:CGRectZero];
-	[UIView setAnimationsEnabled:NO];
 	
 	timeView.alpha = .0f;
 	transportControls.alpha = .0f;
@@ -170,8 +169,6 @@ MPUNowPlayingArtworkView* artwork = nil;
 	timeView.frame = newTimeRect;
 	titlesView.frame = newTitlesRect;
 
-	[UIView setAnimationsEnabled:YES];
-	[UIView setAnimationDuration:.4f];
 	timeView.alpha = 1.0f;
 	transportControls.alpha = 1.0f;
 	titlesView.alpha = 1.0f;
