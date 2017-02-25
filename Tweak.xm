@@ -29,6 +29,7 @@
 @interface MPUMediaControlsTitlesView:UIView
 @end
 @interface MPUNowPlayingArtworkView:UIView
+- (void)refreshDisposition;
 @end
 @interface MusicArtworkView:UIView
 @end
@@ -64,12 +65,25 @@ void refreshNotificationStatus(){
 	[AspectController sharedInstance].notificationsPresent = rt;
 }
 
+MPUNowPlayingArtworkView* artwork = nil;
 %hook MPUNowPlayingArtworkView
+
 - (void)setFrame:(CGRect)frame{
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
-		CGRect rc = frame;
-		rc.origin.y -= frame.size.height/2 + 30;
-		%orig(rc);
+		if(!artwork) artwork = self;
+		if([AspectController sharedInstance].notificationsPresent){
+			CGRect rc = frame;
+			rc.origin = CGPointMake(20,20);
+			rc.size = CGSizeMake(110,110);
+			%orig(rc);
+			return;
+		}else{
+			CGRect rc = frame;
+			rc.origin.y -= frame.size.height/2 + 30;
+			%orig(rc);
+			return;
+		}
+
 		return;
 	}
 	%orig(frame);
@@ -131,13 +145,13 @@ void refreshNotificationStatus(){
 	if([AspectController sharedInstance].notificationsPresent){
 		newVolumeRect.origin.y = -100;
 		newTimeRect.origin.y = 120;
-		newTitlesRect.origin.y = 30;
-		newTitlesRect.origin.x = newTitlesRect.size.width/2-20;
+		newTitlesRect.origin.y = 20;
+		newTitlesRect.origin.x = newTitlesRect.size.width/2-10;
 		newTitlesRect.size.width /= 2;
 		newTitlesRect.size.width += 20;
-		newControlsRect.origin.y = 60;
+		newControlsRect.origin.y = 70;
 		newControlsRect.origin.x = (newControlsRect.size.width*3)/4;
-		newControlsRect.size.width = (newControlsRect.size.width*3)/4;
+		newControlsRect.size.width = (newControlsRect.size.width*4)/5;
 	}else{
 		newVolumeRect.origin.y = [UIScreen mainScreen].bounds.size.height+100;
 		newTimeRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-100;
@@ -146,7 +160,7 @@ void refreshNotificationStatus(){
 	}
 
 
-
+	[artwork setFrame:CGRectZero];
 	[UIView setAnimationsEnabled:NO];
 
 	timeView.alpha = .0f;
