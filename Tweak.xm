@@ -74,7 +74,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 		if(!artwork) artwork = self;
 		CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
-			rc.origin = CGPointMake(20,20);
+			rc.origin = CGPointMake(20,40);
 			rc.size = CGSizeMake(120,120);
 		}else{
 			rc.origin.y -= frame.size.height/2 + 30;
@@ -84,7 +84,8 @@ MPUNowPlayingArtworkView* artwork = nil;
 		[AspectController sharedInstance].previousArtworkRect = rc;
 		return;
 	}
-	%orig(frame);
+	if(frame.size.width != 0)
+		%orig(frame);
 }
 - (void)setAlpha:(double)alpha{
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
