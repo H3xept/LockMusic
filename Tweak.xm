@@ -80,7 +80,7 @@ void refreshNotificationStatus(){
 - (instancetype)init{
 	id rt = %orig();
 	[[NSNotificationCenter defaultCenter] addObserver:rt
-	        selector:@selector(refreshDisposition) 
+	        selector:@selector(refreshDisposition)
 	        name:@"refresh.lock"
 	        object:nil];
 	return rt;
@@ -106,7 +106,7 @@ void refreshNotificationStatus(){
 	CGRect newTimeRect = timeView.frame;
 	CGRect newTitlesRect = titlesView.frame;
 	CGRect newControlsRect = transportControls.frame;
-	
+
 	if([AspectController sharedInstance].notificationsPresent){
 		newVolumeRect.origin.y = -100;
 		newTimeRect.origin.y = 120;
@@ -155,8 +155,8 @@ void refreshNotificationStatus(){
 -(void)collectionView:(id)arg1 performUpdatesAlongsideLayout:(id)arg2{
 	LOG("Updates alongside ");
 	%orig(arg1,arg2);
-	[[NSNotificationCenter defaultCenter] 
-        postNotificationName:@"refresh.lock" 
+	[[NSNotificationCenter defaultCenter]
+        postNotificationName:@"refresh.lock"
         object:nil];
 }
 %end
