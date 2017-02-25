@@ -87,12 +87,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 			[UIView setAnimationsEnabled:NO];
 			%orig([AspectController sharedInstance].previousArtworkRect);
 			[UIView setAnimationsEnabled:YES];
-			[UIView animateWithDuration:.3f
-                 animations:^(){
-                 	%orig(rc);
-                 }
-                 completion:nil];
-			}
+			%orig(rc);}
 		[AspectController sharedInstance].previousArtworkRect = rc;
 		return;
 	}
