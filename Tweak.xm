@@ -71,11 +71,6 @@ MPUNowPlayingArtworkView* artwork = nil;
 
 - (void)setFrame:(CGRect)frame{
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
-	if(frame.size.height == 0){
-		LOG("Set frame ZEOR!");
-	}else{
-		LOG("PO");
-	}
 		if(!artwork) artwork = self;
 		CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
@@ -162,9 +157,8 @@ MPUNowPlayingArtworkView* artwork = nil;
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-150;
 	}
 
-
+	dispatch_async(dispatch_get_main_queue(), ^{
 	[artwork setFrame:CGRectZero];
-	artwork.alpha = .0f;
 	[UIView setAnimationsEnabled:NO];
 	
 	timeView.alpha = .0f;
@@ -181,11 +175,12 @@ MPUNowPlayingArtworkView* artwork = nil;
 	timeView.alpha = 1.0f;
 	transportControls.alpha = 1.0f;
 	titlesView.alpha = 1.0f;
-	artwork.alpha = 1.0f;
 
 	aspect.previousTitleRect = titlesView.frame;
 	aspect.previousControlsRect = transportControls.frame;
 	aspect.previousTimeRect = timeView.frame;
+        });    
+
 
 }
 
