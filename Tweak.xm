@@ -171,8 +171,6 @@ MPUNowPlayingArtworkView* artwork = nil;
 static dispatch_once_t onceToken;
 
 #define belloColor [UIColor colorWithRed:1.00 green:0.18 blue:0.33 alpha:1.0]
-
-    dispatch_once (&onceToken, ^{
     
 	    UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
@@ -191,7 +189,6 @@ static dispatch_once_t onceToken;
 	    [actionSheet addAction:dislike];
 
 		[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:actionSheet animated:YES completion:nil];
-    });
 
 }
 %end
