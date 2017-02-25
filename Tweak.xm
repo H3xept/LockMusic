@@ -161,8 +161,9 @@ MPUNowPlayingArtworkView* artwork = nil;
 
 
 	[artwork setFrame:CGRectZero];
+	artwork.alpha = .0f;
 	[UIView setAnimationsEnabled:NO];
-
+	
 	timeView.alpha = .0f;
 	transportControls.alpha = .0f;
 	titlesView.alpha = .0f;
@@ -177,6 +178,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 	timeView.alpha = 1.0f;
 	transportControls.alpha = 1.0f;
 	titlesView.alpha = 1.0f;
+	artwork.alpha = 1.0f;
 
 	aspect.previousTitleRect = titlesView.frame;
 	aspect.previousControlsRect = transportControls.frame;
