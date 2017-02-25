@@ -83,11 +83,14 @@ MPUNowPlayingArtworkView* artwork = nil;
 		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
 			return;}
 		else {
-
-			[UIView setAnimationsEnabled:NO];
-			%orig([AspectController sharedInstance].previousArtworkRect);
-			[UIView setAnimationsEnabled:YES];
-			%orig(rc);}
+			[UIView animateWithDuration:.3f
+                 animations:^(){
+					[UIView setAnimationsEnabled:NO];
+					%orig(rc);
+					[UIView setAnimationsEnabled:YES];
+                 }
+                 completion:nil];
+		}
 		[AspectController sharedInstance].previousArtworkRect = rc;
 		return;
 	}
