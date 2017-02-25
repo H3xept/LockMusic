@@ -104,10 +104,6 @@ MPUNowPlayingArtworkView* artwork = nil;
 %hook MPUNowPlayingArtworkView
 
 - (void)setFrame:(CGRect)frame{
-	if (!isEnabled()) {
-		%orig(frame);
-		return;
-	}
 
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
 		if(!artwork) artwork = self;
@@ -116,7 +112,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 			rc.origin = CGPointMake(10,40);
 			rc.size = CGSizeMake(120,120);
 		}else{
-			rc.origin.y -= frame.size.height/2 + 60;
+			rc.origin.y -= frame.size.height/2 + 30;
 		}
 		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
 			return;}
@@ -136,12 +132,6 @@ MPUNowPlayingArtworkView* artwork = nil;
 		%orig(frame);
 }
 - (void)setAlpha:(double)alpha{
-
-	if (!isEnabled()) {
-		%orig(alpha);
-		return;
-	}
-
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
 		%orig(1.0);
 		return;
@@ -206,10 +196,6 @@ static dispatch_once_t onceToken;
 %hook MPULockScreenMediaControlsView
 
 - (instancetype)init{
-	if (!isEnabled()) {
-		return %orig();
-	}
-
 	id rt = %orig();
 	[[NSNotificationCenter defaultCenter] addObserver:rt
 	        selector:@selector(refreshDisposition)
@@ -226,10 +212,6 @@ static dispatch_once_t onceToken;
 
 -(void)layoutSubviews{
 	%orig;
-
-	if (!isEnabled()) {
-		return;
-	}
 
 	refreshNotificationStatus();
 
@@ -272,6 +254,7 @@ static dispatch_once_t onceToken;
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-150;
 	}
 
+
 	[artwork setFrame:CGRectZero];
 	[UIView setAnimationsEnabled:NO];
 
@@ -293,13 +276,10 @@ static dispatch_once_t onceToken;
 	aspect.previousTitleRect = titlesView.frame;
 	aspect.previousControlsRect = transportControls.frame;
 	aspect.previousTimeRect = timeView.frame;
+
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-	if (!isEnabled()) {
-		return %orig(point, event);
-	}
-
 	UIView* transportControls = MSHookIvar<MPUTransportControlsView *>(self, "_transportControls");
     CGPoint pointInControls = [transportControls convertPoint:point fromView:self];
     if (CGRectContainsPoint(transportControls.bounds, pointInControls)) {
@@ -313,11 +293,6 @@ static dispatch_once_t onceToken;
 %hook SBDashBoardNotificationListViewController
 -(void)loadView{
 	%orig();
-
-	if (!isEnabled()) {
-		return;
-	}
-
 	NCNotificationListViewController* listView = MSHookIvar<NCNotificationListViewController *>(self, "_listViewController");
 	if(![notificationController isEqual:listView])
 		notificationController = listView;
@@ -327,11 +302,6 @@ static dispatch_once_t onceToken;
 %hook NCNotificationListViewController
 -(void)collectionView:(id)arg1 performUpdatesAlongsideLayout:(id)arg2{
 	%orig(arg1,arg2);
-
-	if (!isEnabled()) {
-		return;
-	}
-
 	[[NSNotificationCenter defaultCenter]
         postNotificationName:@"refresh.lock"
         object:nil];
