@@ -118,10 +118,10 @@ MPUNowPlayingArtworkView* artwork = nil;
 		if(!artwork) artwork = self;
 		CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
-			rc.origin = CGPointMake(10,40);
+			rc.origin = CGPointMake(20,40);
 			rc.size = CGSizeMake(120,120);
 		}else{
-			rc.origin.y -= frame.size.height/2 + 30;
+			rc.origin.y -= frame.size.height/2 + 20;
 		}
 		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
 			return;}
@@ -277,7 +277,6 @@ MPUNowPlayingArtworkView* artwork = nil;
 		newTitlesRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-120-50;
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-150;
 	}
-
 
 	[artwork setFrame:CGRectZero];
 	[UIView setAnimationsEnabled:NO];
