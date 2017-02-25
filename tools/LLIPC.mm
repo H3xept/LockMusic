@@ -10,8 +10,9 @@
 
 kern_return_t llipc_send_handshake(mach_port_t remote, mach_port_t local, uint32_t code)
 {
-    assert(remote);
-    assert(local);
+    if (!MACH_PORT_VALID(remote)) {
+        return 1;
+    }
 
     kern_return_t kr = 0;
 
@@ -69,7 +70,9 @@ kern_return_t llipc_receive_handshake(mach_port_t local, mach_port_t *remote, ui
 
 kern_return_t llipc_send_ping(mach_port_t remote)
 {
-    assert(remote);
+    if (!MACH_PORT_VALID(remote)) {
+        return 1;
+    }
 
     kern_return_t kr = 0;
 
@@ -123,8 +126,9 @@ kern_return_t llipc_recv_ping(mach_port_t local)
 
 kern_return_t llipc_send_log(mach_port_t remote, char *log)
 {
-    assert(remote);
-    assert(log);
+    if (!MACH_PORT_VALID(remote) || !(log)) {
+        return 1;
+    }
 
     kern_return_t kr = 0;
 

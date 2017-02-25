@@ -3,7 +3,13 @@
 #include "./tools/LLIPC.h"
 #include "./tools/LLLog.h"
 
+#define __DBG__
+
+#ifdef __DBG__
 #define LOG(X) LLLogPrint((char *)X);
+#else 
+#define LOG(X)
+#endif
 
 %ctor{
 	assert(lllog_register_service("net.jndok.logserver") == 0);
@@ -33,6 +39,9 @@
 
 @interface AspectController : NSObject
 @property (nonatomic) BOOL notificationsPresent;
+@property (nonatomic) CGRect previousTimeRect;
+@property (nonatomic) CGRect previousControlsRect;
+@property (nonatomic) CGRect previousTitleRect;
 @end
 
 @implementation AspectController
@@ -49,10 +58,9 @@
 NCNotificationListViewController* notificationController = nil;
 void refreshNotificationStatus(){
 	BOOL rt = NO;
-	const char* str = [[NSString stringWithFormat:@"%ld",(long)[notificationController collectionView:(UICollectionView*)notificationController numberOfItemsInSection:0]] UTF8String];
-	LOG(str);
 	if([notificationController collectionView:(UICollectionView*)notificationController numberOfItemsInSection:0])
 		rt = YES;
+
 	[AspectController sharedInstance].notificationsPresent = rt;
 }
 
@@ -102,11 +110,24 @@ void refreshNotificationStatus(){
 	UIView* titlesView = MSHookIvar<MPUMediaControlsTitlesView *>(self, "_titlesView");
 	UIView* transportControls = MSHookIvar<MPUTransportControlsView *>(self, "_transportControls");
 
+	volumeView.alpha = .0f;
+
 	CGRect newVolumeRect = volumeView.frame;
 	CGRect newTimeRect = timeView.frame;
 	CGRect newTitlesRect = titlesView.frame;
 	CGRect newControlsRect = transportControls.frame;
+
+	AspectController* aspect = [AspectController sharedInstance];
+	BOOL rt = NO;
+	if(aspect.previousTimeRect.origin.y == timeView.frame.origin.y)rt=YES;
+	//Setup 
+	timeView.frame = (aspect.previousTimeRect.size.width) ? aspect.previousTimeRect : timeView.frame;
+	transportControls.frame = (aspect.previousControlsRect.size.width) ? aspect.previousControlsRect : transportControls.frame;
+	titlesView.frame = (aspect.previousTitleRect.size.width) ? aspect.previousTitleRect : titlesView.frame;
+	// --
+	if(rt)return;
 	
+
 	if([AspectController sharedInstance].notificationsPresent){
 		newVolumeRect.origin.y = -100;
 		newTimeRect.origin.y = 120;
@@ -125,10 +146,28 @@ void refreshNotificationStatus(){
 	}
 
 
+
+	[UIView setAnimationsEnabled:NO];
+
+	timeView.alpha = .0f;
+	transportControls.alpha = .0f;
+	titlesView.alpha = .0f;
+
 	transportControls.frame = newControlsRect;
 	volumeView.frame = newVolumeRect;
 	timeView.frame = newTimeRect;
 	titlesView.frame = newTitlesRect;
+
+	[UIView setAnimationsEnabled:YES];
+	[UIView setAnimationDuration:.4f];
+	timeView.alpha = 1.0f;
+	transportControls.alpha = 1.0f;
+	titlesView.alpha = 1.0f;
+
+	aspect.previousTitleRect = titlesView.frame;
+	aspect.previousControlsRect = transportControls.frame;
+	aspect.previousTimeRect = timeView.frame;
+
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
@@ -153,7 +192,6 @@ void refreshNotificationStatus(){
 
 %hook NCNotificationListViewController
 -(void)collectionView:(id)arg1 performUpdatesAlongsideLayout:(id)arg2{
-	LOG("Updates alongside ");
 	%orig(arg1,arg2);
 	[[NSNotificationCenter defaultCenter] 
         postNotificationName:@"refresh.lock" 
