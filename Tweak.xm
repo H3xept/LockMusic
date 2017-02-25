@@ -157,12 +157,10 @@ MPUNowPlayingArtworkView* artwork = nil;
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-150;
 	}
 
-	dispatch_async(dispatch_get_main_queue(), ^{
 
-	[UIView animateWithDuration:.5f
-                 animations:^(){
 	[artwork setFrame:CGRectZero];
-
+	[UIView setAnimationsEnabled:NO];
+	
 	timeView.alpha = .0f;
 	transportControls.alpha = .0f;
 	titlesView.alpha = .0f;
@@ -172,6 +170,8 @@ MPUNowPlayingArtworkView* artwork = nil;
 	timeView.frame = newTimeRect;
 	titlesView.frame = newTitlesRect;
 
+	[UIView setAnimationsEnabled:YES];
+	[UIView setAnimationDuration:.4f];
 	timeView.alpha = 1.0f;
 	transportControls.alpha = 1.0f;
 	titlesView.alpha = 1.0f;
@@ -179,10 +179,6 @@ MPUNowPlayingArtworkView* artwork = nil;
 	aspect.previousTitleRect = titlesView.frame;
 	aspect.previousControlsRect = transportControls.frame;
 	aspect.previousTimeRect = timeView.frame;
-                 }
-                 completion:nil];
-        });    
-
 
 }
 
