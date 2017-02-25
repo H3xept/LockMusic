@@ -70,27 +70,27 @@ MPUNowPlayingArtworkView* artwork = nil;
 %hook MPUNowPlayingArtworkView
 
 - (void)setFrame:(CGRect)frame{
+
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
-	if(!artwork) artwork = self;
-	CGRect rc = frame;
+		if(!artwork) artwork = self;
+		CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
 			rc.origin = CGPointMake(10,40);
 			rc.size = CGSizeMake(120,120);
 		}else{
 			rc.origin.y -= frame.size.height/2 + 30;
 		}
-if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
+		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
 			return;}
-	[UIView animateWithDuration:.5 
+		else {
+				[UIView animateWithDuration:.3 
                  animations:^(){
-
-		%orig(rc);
+					%orig(rc);
+                 }
+                 completion:nil];}
+		[AspectController sharedInstance].previousArtworkRect = rc;
+		return;
 	}
-                 
-                 completion:^(BOOL finished){
-                 	[AspectController sharedInstance].previousArtworkRect = rc;
-                 }];return;
-}
 	if(frame.size.width != 0)
 		%orig(frame);
 }
@@ -178,7 +178,7 @@ if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y
 	titlesView.frame = newTitlesRect;
 
 	[UIView setAnimationsEnabled:YES];
-	[UIView setAnimationDuration:.4f];
+	[UIView setAnimationDuration:.3f];
 	timeView.alpha = 1.0f;
 	transportControls.alpha = 1.0f;
 	titlesView.alpha = 1.0f;
