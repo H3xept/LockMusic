@@ -166,7 +166,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 		[[objc_getClass("SBMediaController") sharedInstance] changeTrack:6];
 	}];
     [actionSheet addAction:shuffle];
-    
+
     UIAlertAction* like = [UIAlertAction actionWithTitle:@"Like" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
 		[[objc_getClass("SBMediaController") sharedInstance] likeTrack];
     }];
@@ -261,7 +261,6 @@ MPUNowPlayingArtworkView* artwork = nil;
 	titlesView.frame = (aspect.previousTitleRect.size.width) ? aspect.previousTitleRect : titlesView.frame;
 	// --
 	if(rt)return;
-
 
 	if([AspectController sharedInstance].notificationsPresent){
 		newVolumeRect.origin.y = -100;
