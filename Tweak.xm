@@ -114,7 +114,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 			rc.origin = CGPointMake(10,40);
 			rc.size = CGSizeMake(120,120);
 		}else{
-			rc.origin.y -= frame.size.height/2 + 30;
+			rc.origin.y -= frame.size.height/2 + 60;
 		}
 		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
 			return;}
@@ -134,6 +134,12 @@ MPUNowPlayingArtworkView* artwork = nil;
 		%orig(frame);
 }
 - (void)setAlpha:(double)alpha{
+
+	if (!isEnabled()) {
+		%orig(alpha);
+		return;
+	}
+
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
 		%orig(1.0);
 		return;
