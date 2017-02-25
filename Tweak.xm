@@ -60,7 +60,7 @@ void refreshNotificationStatus(){
 - (void)setFrame:(CGRect)frame{
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
 		CGRect rc = frame;
-		rc.origin.y -= frame.size.height/2 + 30;
+		rc.origin.y -= frame.size.height/2 + 60;
 		%orig(rc);
 		return;
 	}
