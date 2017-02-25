@@ -152,47 +152,8 @@ void refreshNotificationStatus(){
 %end
 
 %hook NCNotificationListViewController
-
-// - (void)loadView{
-// 	%orig();
-// 	if(self.view.superview)
-// 		notificationController = self;
-// }
-
-- (void)deleteItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths{
-	LOG("REMOVE");
-
-	%orig(indexPaths);
-	[[NSNotificationCenter defaultCenter] 
-        postNotificationName:@"refresh.lock" 
-        object:nil];
-}
-
--(id)collectionView:(id)arg1 cellForItemAtIndexPath:(id)arg2{
-
-	[[NSNotificationCenter defaultCenter] 
-        postNotificationName:@"refresh.lock" 
-        object:nil];
-	return %orig(arg1,arg2);
-}
--(void)clearAll{
-	LOG("CLEAR ALL");
-	%orig;
-	[[NSNotificationCenter defaultCenter] 
-        postNotificationName:@"refresh.lock" 
-        object:nil];
-}
--(void)clearAllNonPersistent{
-	LOG("CLEAR NON PERSISTENT");
-
-	%orig;	
-	[[NSNotificationCenter defaultCenter] 
-        postNotificationName:@"refresh.lock" 
-        object:nil];
-}
--(void)notificationListCell:(id)arg1 requestsClearingNotificationRequest:(id)arg2{
-	LOG("REQUEST CLEAR");
-
+-(void)collectionView:(id)arg1 performUpdatesAlongsideLayout:(id)arg2{
+	LOG("Updates alongside ");
 	%orig(arg1,arg2);
 	[[NSNotificationCenter defaultCenter] 
         postNotificationName:@"refresh.lock" 
