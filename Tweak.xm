@@ -83,11 +83,16 @@ MPUNowPlayingArtworkView* artwork = nil;
 		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
 			return;}
 		else {
-				[UIView animateWithDuration:.3 
+
+			[UIView setAnimationsEnabled:NO];
+			%orig([AspectController sharedInstance].previousArtworkRect);
+			[UIView setAnimationsEnabled:YES];
+			[UIView animateWithDuration:.3f
                  animations:^(){
-					%orig(rc);
+                 	%orig(rc);
                  }
-                 completion:nil];}
+                 completion:nil];
+			}
 		[AspectController sharedInstance].previousArtworkRect = rc;
 		return;
 	}
@@ -178,7 +183,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 	titlesView.frame = newTitlesRect;
 
 	[UIView setAnimationsEnabled:YES];
-	[UIView setAnimationDuration:.3f];
+	[UIView setAnimationDuration:.25f];
 	timeView.alpha = 1.0f;
 	transportControls.alpha = 1.0f;
 	titlesView.alpha = 1.0f;
