@@ -24,8 +24,20 @@
 			<key>PostNotification</key>
 			<string>LockMusicPreferencesChangedNotification</string>
 		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>More features coming soon</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Thanks so much for your support!</string>
+		</dict>
 	</array>
 	<key>title</key>
-	<string>lockmusicprefs</string>
+	<string>LockMusic</string>
 </dict>
 </plist>

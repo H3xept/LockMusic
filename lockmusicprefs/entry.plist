@@ -11,11 +11,11 @@
 		<key>detail</key>
 		<string>LMPRootListController</string>
 		<key>icon</key>
-		<string>icon.png</string>
+		<string>Icon_Pref.png</string>
 		<key>isController</key>
 		<true/>
 		<key>label</key>
-		<string>lockmusicprefs</string>
+		<string>LockMusic</string>
 	</dict>
 </dict>
 </plist>
