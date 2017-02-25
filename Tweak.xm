@@ -158,8 +158,11 @@ MPUNowPlayingArtworkView* artwork = nil;
 	}
 
 	dispatch_async(dispatch_get_main_queue(), ^{
+
+	[UIView animateWithDuration:.5f
+                 animations:^(){
 	[artwork setFrame:CGRectZero];
-	
+
 	timeView.alpha = .0f;
 	transportControls.alpha = .0f;
 	titlesView.alpha = .0f;
@@ -176,6 +179,8 @@ MPUNowPlayingArtworkView* artwork = nil;
 	aspect.previousTitleRect = titlesView.frame;
 	aspect.previousControlsRect = transportControls.frame;
 	aspect.previousTimeRect = timeView.frame;
+                 }
+                 completion:nil];
         });    
 
 
