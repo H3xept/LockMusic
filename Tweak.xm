@@ -71,6 +71,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 
 - (void)setFrame:(CGRect)frame{
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
+		[UIView setAnimationsEnabled:NO];
 		if(!artwork) artwork = self;
 		CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
@@ -79,13 +80,18 @@ MPUNowPlayingArtworkView* artwork = nil;
 		}else{
 			rc.origin.y -= frame.size.height/2 + 30;
 		}
-		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y)return;
+		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
+			[UIView setAnimationsEnabled:YES];
+			return;}
 		else %orig(rc);
 		[AspectController sharedInstance].previousArtworkRect = rc;
+		[UIView setAnimationsEnabled:YES];
 		return;
 	}
 	if(frame.size.width != 0)
 		%orig(frame);
+	[UIView setAnimationsEnabled:YES];
+
 }
 - (void)setAlpha:(double)alpha{
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
