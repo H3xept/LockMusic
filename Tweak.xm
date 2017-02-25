@@ -150,44 +150,66 @@ MPUNowPlayingArtworkView* artwork = nil;
 //                                       animated:YES
 //                                     completion:nil];
 
+UIButton *button = nil;
 %hook SBDashBoardView
--(void)layoutSubviews{
-	%orig;
 
-	UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-	UIScrollView* scroll = MSHookIvar<UIScrollView *>(self, "_scrollView");
-	[button setImage:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Group@3x" ofType:@"png"]] forState:UIControlStateNormal];
-	button.frame = CGRectMake([UIScreen mainScreen].bounds.size.width*2-(36+8), [UIScreen mainScreen].bounds.size.height-(8+8), 36.0, 8.0);
-	button.contentMode = UIViewContentModeScaleAspectFit;
-	button.layer.masksToBounds = YES;
-	button.alpha = .5f;
-	[scroll addSubview:button];
-
-}
-
-- (void)drawRect:(CGRect)rect{
-	%orig(rect);
+%new
+- (void)musicButtonPressed{
 
 #define belloColor [UIColor colorWithRed:1.00 green:0.18 blue:0.33 alpha:1.0]
     
-	    UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
-	    [actionSheet addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+    [actionSheet addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
 
-	    }]];	
+    }]];	
 
-	    UIAlertAction* like = [UIAlertAction actionWithTitle:@"Like" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {}];
-	    [like setValue:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth@3x" ofType:@"png"]] forKey:@"image"];
-	    [like setValue:belloColor forKey:@"imageTintColor"];
-	    [actionSheet addAction:like];
+    UIAlertAction* like = [UIAlertAction actionWithTitle:@"Like" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {}];
+    [like setValue:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth" ofType:@"png"]] forKey:@"image"];
+    [like setValue:belloColor forKey:@"imageTintColor"];
+    [actionSheet addAction:like];
 
-		UIAlertAction* dislike = [UIAlertAction actionWithTitle:@"Dislike" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {}];
-	    [dislike setValue:belloColor forKey:@"imageTintColor"];
-	    [dislike setValue:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Line@3x" ofType:@"png"]] forKey:@"image"];
-	    [actionSheet addAction:dislike];
+	UIAlertAction* dislike = [UIAlertAction actionWithTitle:@"Dislike" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {}];
+    [dislike setValue:belloColor forKey:@"imageTintColor"];
+    [dislike setValue:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Line" ofType:@"png"]] forKey:@"image"];
+    [actionSheet addAction:dislike];
 
-		[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:actionSheet animated:YES completion:nil];
+	[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:actionSheet animated:YES completion:nil];
 
+}
+
+-(void)layoutSubviews{
+	%orig;
+
+	button = [UIButton buttonWithType:UIButtonTypeCustom];
+	UIScrollView* scroll = MSHookIvar<UIScrollView *>(self, "_scrollView");
+	[button setImage:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Group" ofType:@"png"]] forState:UIControlStateNormal];
+	button.frame = CGRectMake([UIScreen mainScreen].bounds.size.width*2-(48), [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f);
+
+	button.contentMode = UIViewContentModeBottom;
+	// button.layer.masksToBounds = YES;
+	// button.alpha = .5f;
+	[scroll addSubview:button];
+	[button addTarget:self 
+	             action:@selector(musicButtonPressed) 
+	   forControlEvents:UIControlEventTouchUpInside];
+	button.hidden = YES;
+}
+
+%end
+
+@interface MPUNowPlayingController:NSObject
+-(BOOL)isPlaying;
+@end
+
+%hook MPULockScreenMediaControlsViewController
+-(void)nowPlayingController:(id)arg1 playbackStateDidChange:(BOOL)arg2{
+	%orig(arg1,arg2);
+	if(arg2){
+		button.hidden = NO;
+	}else{
+		button.hidden = YES;
+	}
 }
 %end
 
