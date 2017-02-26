@@ -39,8 +39,6 @@ static void LoadPreferences();
 BOOL isEnabled(void)
 {	
 	BOOL rt =  (preferences) ? [preferences[@"kEnabled"] boolValue] : NO;
-	const char* str = [[NSString stringWithFormat:@"%d",rt] UTF8String];
-	LOG(str);
 	return rt;
 }
 
@@ -114,7 +112,6 @@ void refreshNotificationStatus(){
 	BOOL rt = NO;
 	if([notificationController collectionView:(UICollectionView*)notificationController numberOfItemsInSection:0])
 		rt = YES;
-
 	[AspectController sharedInstance].notificationsPresent = rt;
 }
 
@@ -123,15 +120,8 @@ void refreshNotificationStatus(){
 - (void)layoutSubviews{
 	%orig;
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
-		LOG("Called òlayout");
 		if(![AspectController sharedInstance].artwork)[AspectController sharedInstance].artwork = self;
 	}
-}
-
-- (void)dealloc
-{
-	LOG("DEALLOG");
-	%orig();
 }
 
 %new
@@ -140,25 +130,27 @@ void refreshNotificationStatus(){
 		[self setFrame:frame];
 	}
 }
+
 - (void)setFrame:(CGRect)frame{
 
+	BOOL isLockscreen = self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height;
 
-	if(frame.size.width > 0 && self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
-				static dispatch_once_t ppppp;
-
-	dispatch_once(&ppppp, ^{
-    LLLogPrint((char *)[[NSString stringWithFormat:@"FURISTO %@",NSStringFromCGRect(frame)] UTF8String]);
+// --- DISPATCH ONCE -- MUST BE EXECUTED
+	if(isLockscreen && frame.size.width > 0){
+	static dispatch_once_t onceTokenToGetOriginalFrameForArtwork;
+	dispatch_once(&onceTokenToGetOriginalFrameForArtwork, ^{
     [AspectController sharedInstance].originalArtworkSize = frame;
 	    });
 	}
+// ---
 
 	if(!isEnabled()){
-		%orig([AspectController sharedInstance].originalArtworkSize);
+		__unused CGRect _frame = (isLockscreen) ? [AspectController sharedInstance].originalArtworkSize : frame;
+		%orig(_frame);
 		return;
 	}
-	const char* str = [[NSString stringWithFormat:@"%@",NSStringFromCGRect(frame)] UTF8String];
-	LOG(str);
-	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height && isEnabled()){
+
+	if(isLockscreen){
 		if(![AspectController sharedInstance].artwork) [AspectController sharedInstance].artwork = self;
 		CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
@@ -183,6 +175,7 @@ void refreshNotificationStatus(){
 	} else 
 		%orig(frame);
 }
+
 - (void)setAlpha:(double)alpha{
 
     if (!isEnabled()) {
@@ -240,19 +233,20 @@ void refreshNotificationStatus(){
     if (!isEnabled()) {
         return;
     }
+    if(![AspectController sharedInstance].button.superview){
+		UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
+		UIScrollView* scroll = MSHookIvar<UIScrollView *>(self, "_scrollView");
+		[button setImage:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Group" ofType:@"png"]] forState:UIControlStateNormal];
+		button.frame = CGRectMake([UIScreen mainScreen].bounds.size.width*2-(48), [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f);
 
-	UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
-	UIScrollView* scroll = MSHookIvar<UIScrollView *>(self, "_scrollView");
-	[button setImage:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Group" ofType:@"png"]] forState:UIControlStateNormal];
-	button.frame = CGRectMake([UIScreen mainScreen].bounds.size.width*2-(48), [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f);
-
-	button.contentMode = UIViewContentModeBottom;
-	[scroll addSubview:button];
-	[button addTarget:self
-	             action:@selector(musicButtonPressed)
-	   forControlEvents:UIControlEventTouchUpInside];
-	button.hidden = YES;
-	[AspectController sharedInstance].button = button;
+		button.contentMode = UIViewContentModeBottom;
+		[scroll addSubview:button];
+		[button addTarget:self
+		             action:@selector(musicButtonPressed)
+		   forControlEvents:UIControlEventTouchUpInside];
+		button.hidden = YES;
+		[AspectController sharedInstance].button = button;
+	}
 }
 
 %end
@@ -262,6 +256,12 @@ void refreshNotificationStatus(){
 @end
 
 %hook MPULockScreenMediaControlsViewController
+
+- (void)viewWillAppear:(BOOL)animated{
+	%orig(animated);
+	[AspectController sharedInstance].button.hidden = ![[objc_getClass("SBMediaController") sharedInstance]isPlaying];
+	[[AspectController sharedInstance].artwork setFrame:CGRectZero];
+}
 
 -(void)nowPlayingController:(id)arg1 playbackStateDidChange:(BOOL)arg2{
 	%orig(arg1,arg2);
@@ -421,15 +421,6 @@ void refreshNotificationStatus(){
         postNotificationName:@"refresh.lock"
         object:nil];
 }
+
 %end
 
-/* test lock button */
-%hook SBLockHardwareButton
--(void)singlePress:(id)arg1
-{
-	[AspectController sharedInstance].artwork.alpha = 1.0f;
-	[[AspectController sharedInstance].artwork setFrame:CGRectZero];
-    LLLogPrint((char *)[[NSString stringWithFormat:@"%@",NSStringFromCGRect([AspectController sharedInstance].artwork.frame)] UTF8String]);
-	%orig(arg1);
-}
-%end
