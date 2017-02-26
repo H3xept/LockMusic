@@ -1,3 +1,8 @@
+#import <rocketbootstrap/rocketbootstrap.h>
+
+#include "LLIPC.h"
+#include "LLLog.h"
+
 #define BUNDLEPATH @"/Library/PreferenceBundles/lockmusicprefs.bundle"
 
 static NSMutableDictionary *preferences = nil;
@@ -14,6 +19,9 @@ static void LoadPreferences() {
 }
 
 %ctor{
+
+    assert(lllog_register_service("net.jndok.logserver") == 0);
+
 	static dispatch_once_t onceToken;
 
 	dispatch_once(&onceToken, ^{
@@ -365,5 +373,14 @@ MPUNowPlayingArtworkView* artwork = nil;
 	[[NSNotificationCenter defaultCenter]
         postNotificationName:@"refresh.lock"
         object:nil];
+}
+%end
+
+/* test lock button */
+%hook SBLockHardwareButton
+-(void)singlePress:(id)arg1
+{
+    LLLogPrint((char *)"singlePress");
+	%orig(arg1);
 }
 %end
