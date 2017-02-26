@@ -112,14 +112,14 @@ void refreshNotificationStatus(){
 MPUNowPlayingArtworkView* artwork = nil;
 %hook MPUNowPlayingArtworkView
 
+- (void)fakeSetFrame:(CGRect)frame{
+	if(isEnabled()){
+		[self setFrame:frame];
+	}
+}
 - (void)setFrame:(CGRect)frame{
 
-    if (!isEnabled()) {
-        %orig(frame);
-        return;
-    }
-
-	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
+	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height && isEnabled()){
 		if(!artwork) artwork = self;
 		CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
@@ -310,7 +310,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-150;
 	}
 
-	[artwork setFrame:CGRectZero];
+	[artwork fakeSetFrame:CGRectZero];
 	[UIView setAnimationsEnabled:NO];
 
 	timeView.alpha = .0f;
