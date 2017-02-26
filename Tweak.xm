@@ -15,15 +15,7 @@
 static NSMutableDictionary *preferences = nil;
 static CFStringRef applicationID = (__bridge CFStringRef)@"com.fl00d.lockmusicprefs";
 
-static void LoadPreferences() {
-    if (CFPreferencesAppSynchronize(applicationID)) {
-        CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-        if (keyList) {
-            preferences = [(NSDictionary *)CFPreferencesCopyMultiple(keyList, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost) mutableCopy];
-            CFRelease(keyList);
-        }
-    }
-}
+static void LoadPreferences();
 
 %ctor{
 
@@ -45,8 +37,11 @@ static void LoadPreferences() {
 }
 
 BOOL isEnabled(void)
-{
-	return (preferences) ? [preferences[@"kEnabled"] boolValue] : NO;
+{	
+	BOOL rt =  (preferences) ? [preferences[@"kEnabled"] boolValue] : NO;
+	const char* str = [[NSString stringWithFormat:@"%d",rt] UTF8String];
+	LOG(str);
+	return rt;
 }
 
 @interface SBDashBoardMediaArtworkViewController:UIViewController
@@ -87,7 +82,9 @@ BOOL isEnabled(void)
 @property (nonatomic) CGRect previousControlsRect;
 @property (nonatomic) CGRect previousTitleRect;
 @property (nonatomic) CGRect previousArtworkRect;
+@property (nonatomic,strong) MPUNowPlayingArtworkView* artwork;
 @property (nonatomic,strong) UIButton* button;
+@property (nonatomic) CGRect originalArtworkSize;
 @end
 
 @implementation AspectController
@@ -102,6 +99,17 @@ BOOL isEnabled(void)
 @end
 
 NCNotificationListViewController* notificationController = nil;
+
+static void LoadPreferences() {
+    if (CFPreferencesAppSynchronize(applicationID)) {
+        CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+        if (keyList) {
+            preferences = [(NSDictionary *)CFPreferencesCopyMultiple(keyList, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost) mutableCopy];
+            CFRelease(keyList);
+        }
+    }
+}
+
 void refreshNotificationStatus(){
 	BOOL rt = NO;
 	if([notificationController collectionView:(UICollectionView*)notificationController numberOfItemsInSection:0])
@@ -110,8 +118,22 @@ void refreshNotificationStatus(){
 	[AspectController sharedInstance].notificationsPresent = rt;
 }
 
-MPUNowPlayingArtworkView* artwork = nil;
 %hook MPUNowPlayingArtworkView
+
+- (void)layoutSubviews{
+	%orig;
+	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
+		LOG("Called òlayout");
+		if(![AspectController sharedInstance].artwork)[AspectController sharedInstance].artwork = self;
+	}
+}
+
+- (void)dealloc
+{
+	LOG("DEALLOG");
+	%orig();
+}
+
 %new
 - (void)fakeSetFrame:(CGRect)frame{
 	if(isEnabled()){
@@ -120,10 +142,24 @@ MPUNowPlayingArtworkView* artwork = nil;
 }
 - (void)setFrame:(CGRect)frame{
 
-		const char* str = [[NSString stringWithFormat:@"%@",NSStringFromCGRect(frame)] UTF8String];
-		LOG(str);
+
+	if(frame.size.width > 0 && self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
+				static dispatch_once_t ppppp;
+
+	dispatch_once(&ppppp, ^{
+    LLLogPrint((char *)[[NSString stringWithFormat:@"FURISTO %@",NSStringFromCGRect(frame)] UTF8String]);
+    [AspectController sharedInstance].originalArtworkSize = frame;
+	    });
+	}
+
+	if(!isEnabled()){
+		%orig([AspectController sharedInstance].originalArtworkSize);
+		return;
+	}
+	const char* str = [[NSString stringWithFormat:@"%@",NSStringFromCGRect(frame)] UTF8String];
+	LOG(str);
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height && isEnabled()){
-		if(!artwork) artwork = self;
+		if(![AspectController sharedInstance].artwork) [AspectController sharedInstance].artwork = self;
 		CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
 			rc.origin = CGPointMake(20,40);
@@ -144,8 +180,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 		}
 		[AspectController sharedInstance].previousArtworkRect = rc;
 		return;
-	}
-	if(frame.size.width != 0)
+	} else 
 		%orig(frame);
 }
 - (void)setAlpha:(double)alpha{
@@ -313,7 +348,7 @@ MPUNowPlayingArtworkView* artwork = nil;
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-150;
 	}
 
-	[artwork fakeSetFrame:CGRectZero];
+	[[AspectController sharedInstance].artwork fakeSetFrame:CGRectZero];
 	[UIView setAnimationsEnabled:NO];
 
 	timeView.alpha = .0f;
@@ -392,7 +427,9 @@ MPUNowPlayingArtworkView* artwork = nil;
 %hook SBLockHardwareButton
 -(void)singlePress:(id)arg1
 {
-    LLLogPrint((char *)"singlePress");
+	[AspectController sharedInstance].artwork.alpha = 1.0f;
+	[[AspectController sharedInstance].artwork setFrame:CGRectZero];
+    LLLogPrint((char *)[[NSString stringWithFormat:@"%@",NSStringFromCGRect([AspectController sharedInstance].artwork.frame)] UTF8String]);
 	%orig(arg1);
 }
 %end
