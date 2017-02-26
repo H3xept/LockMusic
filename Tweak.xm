@@ -155,12 +155,12 @@ MPUNowPlayingArtworkView* artwork = nil;
 - (void)musicButtonPressed{
 
 #define belloColor [UIColor colorWithRed:1.00 green:0.18 blue:0.33 alpha:1.0]
-    
+
     UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
     [actionSheet addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
 
-    }]];	
+    }]];
 
 	UIAlertAction* shuffle = [UIAlertAction actionWithTitle:@"Next shuffle track" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
 		[[objc_getClass("SBMediaController") sharedInstance] changeTrack:6];
@@ -195,8 +195,8 @@ MPUNowPlayingArtworkView* artwork = nil;
 
 	button.contentMode = UIViewContentModeBottom;
 	[scroll addSubview:button];
-	[button addTarget:self 
-	             action:@selector(musicButtonPressed) 
+	[button addTarget:self
+	             action:@selector(musicButtonPressed)
 	   forControlEvents:UIControlEventTouchUpInside];
 	button.hidden = YES;
 	[AspectController sharedInstance].button = button;

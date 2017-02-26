@@ -11,7 +11,7 @@
 		<key>detail</key>
 		<string>LMPRootListController</string>
 		<key>icon</key>
-		<string>Icon_Pref.png</string>
+		<string>Icon.png</string>
 		<key>isController</key>
 		<true/>
 		<key>label</key>

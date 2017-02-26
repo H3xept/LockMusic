@@ -1,5 +1,7 @@
 include $(THEOS)/makefiles/common.mk
 
+ARCHS = arm64 armv7
+
 TWEAK_NAME = LockMusic
 LockMusic_FILES = Tweak.xm ./tools/LLIPC.mm ./tools/LLLog.mm
 LockMusic_LIBRARIES = rocketbootstrap
