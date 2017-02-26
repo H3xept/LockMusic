@@ -3,6 +3,13 @@
 #include "LLIPC.h"
 #include "LLLog.h"
 
+#define __DBG__ 
+#ifdef __DBG__
+#define LOG(X) LLLogPrint((char*)X)
+#else
+#define LOG(X)
+#endif
+
 #define BUNDLEPATH @"/Library/PreferenceBundles/lockmusicprefs.bundle"
 
 static NSMutableDictionary *preferences = nil;
@@ -258,6 +265,8 @@ MPUNowPlayingArtworkView* artwork = nil;
 	%orig;
 
     if (!isEnabled()) {
+    	UIView* volumeView = MSHookIvar<MPUMediaControlsVolumeView *>(self, "_volumeView");
+    	volumeView.alpha = 1.0f;
         return;
     }
 
