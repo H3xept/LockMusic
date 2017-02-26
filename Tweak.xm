@@ -120,6 +120,8 @@ MPUNowPlayingArtworkView* artwork = nil;
 - (void)setFrame:(CGRect)frame{
 
 	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height && isEnabled()){
+		const char* str = [[NSString stringWithFormat:@"%@",NSStringFromCGRect(frame)] UTF8String];
+		LOG(str);
 		if(!artwork) artwork = self;
 		CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
