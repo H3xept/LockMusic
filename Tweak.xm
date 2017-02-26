@@ -127,7 +127,9 @@ void refreshNotificationStatus(){
 %new
 - (void)fakeSetFrame:(CGRect)frame{
 	if(isEnabled()){
+		[UIView setAnimationsEnabled:NO];
 		[self setFrame:frame];
+		[UIView setAnimationsEnabled:YES];
 	}
 }
 
@@ -172,7 +174,8 @@ void refreshNotificationStatus(){
 		}
 		[AspectController sharedInstance].previousArtworkRect = rc;
 		return;
-	} else 
+	}
+	if(frame.size.width != 0)
 		%orig(frame);
 }
 
