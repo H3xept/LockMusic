@@ -264,7 +264,7 @@ void refreshNotificationStatus(){
 	%orig(animated);
 	[AspectController sharedInstance].button.hidden = ![[objc_getClass("SBMediaController") sharedInstance]isPlaying];
 	[UIView setAnimationsEnabled:NO];
-	[[AspectController sharedInstance].artwork setFrame:CGRectZero];
+	[[AspectController sharedInstance].artwork setFrame:[AspectController sharedInstance].originalArtworkSize];
 	[UIView setAnimationsEnabled:YES];
 }
 
