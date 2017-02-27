@@ -352,7 +352,9 @@ void refreshNotificationStatus(){
 		newTitlesRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-120-50;
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-150;
 	}
-
+	const char* str = [[NSString stringWithFormat:@"%f - %f",newTitlesRect.origin.y,titlesView.frame.origin.y] UTF8String];
+	LOG(str);
+	if(newTitlesRect.origin.y == titlesView.frame.origin.y) return;
 	[[AspectController sharedInstance].artwork fakeSetFrame:CGRectZero];
 	[UIView setAnimationsEnabled:NO];
 
