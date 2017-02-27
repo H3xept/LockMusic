@@ -6,8 +6,12 @@
 #define __DBG__ 
 #ifdef __DBG__
 #define LOG(X) LLLogPrint((char*)X)
+#define FLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%f",X] UTF8String])
+#define FRLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%@",NSStringFromCGRect(X)] UTF8String])
 #else
 #define LOG(X)
+#define FLOG(X)
+#define FRLOG(X)
 #endif
 
 #define BUNDLEPATH @"/Library/PreferenceBundles/lockmusicprefs.bundle"
@@ -328,14 +332,11 @@ void refreshNotificationStatus(){
 	CGRect newControlsRect = transportControls.frame;
 
 	AspectController* aspect = [AspectController sharedInstance];
-	BOOL rt = NO;
-	if(aspect.previousTimeRect.origin.y == timeView.frame.origin.y)rt=YES;
-	//Setup
-	timeView.frame = (aspect.previousTimeRect.size.width) ? aspect.previousTimeRect : timeView.frame;
-	transportControls.frame = (aspect.previousControlsRect.size.width) ? aspect.previousControlsRect : transportControls.frame;
-	titlesView.frame = (aspect.previousTitleRect.size.width) ? aspect.previousTitleRect : titlesView.frame;
-	// --
-	if(rt)return;
+
+	LOG("Titles:");
+	FRLOG(titlesView.frame);
+	LOG("Time:");
+	FRLOG(timeView.frame);
 
 	if([AspectController sharedInstance].notificationsPresent){
 		newVolumeRect.origin.y = -100;
@@ -352,9 +353,18 @@ void refreshNotificationStatus(){
 		newTitlesRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-120-50;
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-150;
 	}
-	const char* str = [[NSString stringWithFormat:@"%f - %f",newTitlesRect.origin.y,titlesView.frame.origin.y] UTF8String];
-	LOG(str);
 	if(newTitlesRect.origin.y == titlesView.frame.origin.y) return;
+
+	aspect.previousTitleRect = titlesView.frame;
+	aspect.previousControlsRect = transportControls.frame;
+	aspect.previousTimeRect = timeView.frame;
+	
+	//Setup
+	timeView.frame = (aspect.previousTimeRect.size.width) ? aspect.previousTimeRect : timeView.frame;
+	transportControls.frame = (aspect.previousControlsRect.size.width) ? aspect.previousControlsRect : transportControls.frame;
+	titlesView.frame = (aspect.previousTitleRect.size.width) ? aspect.previousTitleRect : titlesView.frame;
+	// --
+
 	[[AspectController sharedInstance].artwork fakeSetFrame:CGRectZero];
 	[UIView setAnimationsEnabled:NO];
 
@@ -372,10 +382,6 @@ void refreshNotificationStatus(){
 	timeView.alpha = 1.0f;
 	transportControls.alpha = 1.0f;
 	titlesView.alpha = 1.0f;
-
-	aspect.previousTitleRect = titlesView.frame;
-	aspect.previousControlsRect = transportControls.frame;
-	aspect.previousTimeRect = timeView.frame;
 
 }
 
@@ -421,13 +427,12 @@ void refreshNotificationStatus(){
 	%orig(arg1,arg2);
 
     if (!isEnabled()) {
-        return;
+    	return;
     }
 
 	[[NSNotificationCenter defaultCenter]
         postNotificationName:@"refresh.lock"
         object:nil];
 }
-
 %end
 
