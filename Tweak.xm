@@ -1,4 +1,5 @@
 #import <rocketbootstrap/rocketbootstrap.h>
+#import "YoloViewController.h"
 
 #include "LLIPC.h"
 #include "LLLog.h"
@@ -205,32 +206,10 @@ void refreshNotificationStatus(){
 
 #define belloColor [UIColor colorWithRed:1.00 green:0.18 blue:0.33 alpha:1.0]
 
-    UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-
-    [actionSheet addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-
-    }]];
-
-	UIAlertAction* shuffle = [UIAlertAction actionWithTitle:@"Next shuffle track" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-		[[objc_getClass("SBMediaController") sharedInstance] changeTrack:6];
-	}];
-    [actionSheet addAction:shuffle];
-
-    UIAlertAction* like = [UIAlertAction actionWithTitle:@"Like" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-		[[objc_getClass("SBMediaController") sharedInstance] likeTrack];
-    }];
-    [like setValue:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth" ofType:@"png"]] forKey:@"image"];
-    [like setValue:belloColor forKey:@"imageTintColor"];
-    [actionSheet addAction:like];
-
-	UIAlertAction* dislike = [UIAlertAction actionWithTitle:@"Dislike" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-		[[objc_getClass("SBMediaController") sharedInstance] banTrack];
-	}];
-    [dislike setValue:belloColor forKey:@"imageTintColor"];
-    [dislike setValue:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Line" ofType:@"png"]] forKey:@"image"];
-    [actionSheet addAction:dislike];
-
-	[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:actionSheet animated:YES completion:nil];
+	YoloViewController* yoloVC = [[YoloViewController alloc] init];
+	[yoloVC setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+	[yoloVC setModalTransitionStyle:UIModalTransitionStyleCrossDissolve];
+	[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:yoloVC animated:YES completion:nil];
 
 }
 

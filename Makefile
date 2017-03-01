@@ -1,7 +1,7 @@
 include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = lockmusic
-lockmusic_FILES = Tweak.xm LLIPC.mm LLLog.mm
+lockmusic_FILES = Tweak.xm LLIPC.mm LLLog.mm YoloViewController.m
 lockmusic_LIBRARIES = rocketbootstrap
 
 include $(THEOS_MAKE_PATH)/tweak.mk
