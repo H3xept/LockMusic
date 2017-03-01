@@ -70,6 +70,8 @@ BOOL isEnabled(void)
 @end
 @interface NCNotificationListViewController:UICollectionViewController
 @end
+@interface SBMainScreenAlertWindowViewController:UIViewController
+@end
 
 @interface SBMediaController:NSObject
 +(id)sharedInstance;
@@ -88,6 +90,7 @@ BOOL isEnabled(void)
 @property (nonatomic,strong) MPUNowPlayingArtworkView* artwork;
 @property (nonatomic,strong) UIButton* button;
 @property (nonatomic) CGRect originalArtworkSize;
+@property (nonatomic,strong) SBMainScreenAlertWindowViewController* presentationVC;
 @end
 
 @implementation AspectController
@@ -119,6 +122,13 @@ void refreshNotificationStatus(){
 		rt = YES;
 	[AspectController sharedInstance].notificationsPresent = rt;
 }
+
+%hook SBMainScreenAlertWindowViewController
+-(void)loadView{
+	[AspectController sharedInstance].presentationVC = self;
+	%orig();
+}
+%end
 
 %hook MPUNowPlayingArtworkView
 
@@ -208,8 +218,7 @@ void refreshNotificationStatus(){
 
 	YoloViewController* yoloVC = [[YoloViewController alloc] init];
 	[yoloVC setModalPresentationStyle:UIModalPresentationOverCurrentContext];
-	[yoloVC setModalTransitionStyle:UIModalTransitionStyleCrossDissolve];
-	[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:yoloVC animated:YES completion:nil];
+	[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:yoloVC animated:NO completion:nil];
 
 }
 

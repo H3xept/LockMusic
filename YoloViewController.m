@@ -4,26 +4,17 @@
 #define BUNDLEPATH @"/Library/PreferenceBundles/lockmusicprefs.bundle"
 #define ios10Blue [UIColor colorWithRed:0.00 green:0.48 blue:1.00 alpha:1.0]
 
-@interface UIVisualEffectView (RoundedCorners)
+@interface UIView (RoundedCorners)
 
 - (void)setRoundedCorners:(UIRectCorner)corners radius:(CGSize)size;
 
 @end
 
-@implementation UIVisualEffectView (RoundedCorners)
+@implementation UIView (RoundedCorners)
 
 - (void)setRoundedCorners:(UIRectCorner)corners radius:(CGSize)size {
-    UIBezierPath* maskPath = [UIBezierPath bezierPathWithRoundedRect:self.bounds byRoundingCorners:corners cornerRadii:size];
-    
-    CAShapeLayer* maskLayer = [CAShapeLayer new];
-    maskLayer.frame = self.bounds;
-    maskLayer.path = maskPath.CGPath;
-    
-    UIView* maskView = [[UIView alloc] initWithFrame:self.bounds];
-    maskView.backgroundColor = [UIColor blackColor];
-    maskView.layer.mask = maskLayer;
-    
-    self.maskView = maskView;
+    [self.layer setCornerRadius:size.height];
+    self.layer.masksToBounds = YES;
 }
 
 @end
@@ -65,7 +56,7 @@
 @end
 
 @interface YoloViewController ()
-@property (nonatomic,strong) NSLayoutConstraint* topConstraint;
+@property (nonatomic,weak) NSLayoutConstraint* topConstraint;
 - (void)hearthhasBeenPressed:(UIButton*)hearth;
 - (void)hearthhasBeenReleased:(UIButton*)hearth;
 - (void)cancelButtonPressed:(UIButton*)cancelButton;
@@ -89,11 +80,11 @@
     shadowView.backgroundColor = [UIColor blackColor];
     shadowView.alpha = .25f;
     [self.view addSubview:shadowView];
+    shadowView.hidden = YES;
     _shadowView = shadowView;
     
     UIView* activityContainerView = [[UIView alloc] init];
     activityContainerView.translatesAutoresizingMaskIntoConstraints = NO;
-    activityContainerView.userInteractionEnabled = YES;
     activityContainerView.backgroundColor = [UIColor clearColor];
     [self.view addSubview:activityContainerView];
     _activityContainerView = activityContainerView;
@@ -103,16 +94,26 @@
     
     [super viewDidLoad];
     
+    if(!_upperContainer){
+        UIView* upperContainer = [[UIView alloc] init];
+        upperContainer.translatesAutoresizingMaskIntoConstraints = NO;
+        [_activityContainerView addSubview:upperContainer];
+        _upperContainer = upperContainer;
+    }
+    
     if(!_cancelView){
+        
+        UIView* cancelViewContainer = [[UIView alloc] init];
+        cancelViewContainer.translatesAutoresizingMaskIntoConstraints = NO;
         
         UIVisualEffectView* cancelView = [[UIVisualEffectView alloc] init];
         cancelView.translatesAutoresizingMaskIntoConstraints = NO;
-        
         UIVisualEffect *blurEffect;
         blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleExtraLight];
         cancelView.effect = blurEffect;
-        [_activityContainerView addSubview:cancelView];
-        
+        [_activityContainerView addSubview:cancelViewContainer];
+        [cancelViewContainer addSubview:cancelView];
+        _cancelViewContainer = cancelViewContainer;
 
         UIButton* cancelLabel = [UIButton buttonWithType:UIButtonTypeSystem];
         cancelLabel.translatesAutoresizingMaskIntoConstraints = NO;
@@ -130,11 +131,11 @@
         
         UIVisualEffectView* likeDislikeView = [[UIVisualEffectView alloc] init];
         likeDislikeView.translatesAutoresizingMaskIntoConstraints = NO;
-        likeDislikeView.userInteractionEnabled = YES;
+
         UIVisualEffect *blurEffect;
         blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleExtraLight];
         likeDislikeView.effect = blurEffect;
-        [_activityContainerView addSubview:likeDislikeView];
+        [_upperContainer addSubview:likeDislikeView];
         
         
         UIButton* hearth = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -173,7 +174,7 @@
         UIVisualEffect *blurEffect;
         blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleExtraLight];
         dummyView.effect = blurEffect;
-        [_activityContainerView addSubview:dummyView];
+        [_upperContainer addSubview:dummyView];
         
         _dummyView = dummyView;
         
@@ -181,20 +182,29 @@
     
     if(!self->hasBeenSetup){
         
-        NSArray* h = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[_cancelView]-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_cancelView)];
-        NSArray* v = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[_cancelView(==54)]-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_cancelView)];
+        NSArray* h = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[_cancelViewContainer]-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_cancelViewContainer)];
+        NSArray* v = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[_cancelViewContainer(==54)]-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_cancelViewContainer)];
+
+        NSArray* cancelViewH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_cancelView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_cancelView)];
+        NSArray* cancelViewV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_cancelView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_cancelView)];
         
         NSArray* hC = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-4-[_activityContainerView]-4-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_activityContainerView)];
         
+    
         NSLayoutConstraint* vC = [NSLayoutConstraint constraintWithItem:_activityContainerView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1.0f constant:.0f];
         
         NSLayoutConstraint* hL = [NSLayoutConstraint constraintWithItem:_cancelLabel attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:_cancelView attribute:NSLayoutAttributeCenterY multiplier:1.0f constant:.0f];
         
         NSLayoutConstraint* vL = [NSLayoutConstraint constraintWithItem:_cancelLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:_cancelView attribute:NSLayoutAttributeCenterX multiplier:1.0f constant:.0f];
         
-        NSArray* likeDislikeViewH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[_likeDislikeView]-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_likeDislikeView)];
+        // ---
+        NSArray* upperContainerH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[_upperContainer]-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_upperContainer)];
+        
+        NSArray* upperContainerV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_upperContainer]-[_cancelViewContainer]" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_upperContainer,_cancelViewContainer)];
+        
+        NSArray* likeDislikeViewH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_likeDislikeView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_likeDislikeView)];
 
-        NSArray* likeDislikeViewV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[_likeDislikeView(==54)]-[_cancelView]" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_likeDislikeView,_cancelView)];
+        NSArray* likeDislikeViewV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[_likeDislikeView(==54)]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_likeDislikeView)];
         
         NSLayoutConstraint* hearthVerticalAlign = [NSLayoutConstraint constraintWithItem:_hearth attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:_likeDislikeView attribute:NSLayoutAttributeCenterY multiplier:1.0f constant:.0f];
         
@@ -212,24 +222,28 @@
         
         NSLayoutConstraint* linedHearthVSize = [NSLayoutConstraint constraintWithItem:_linedHearth attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0f constant:100.0f];
         
-        NSArray* dummyViewH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[_dummyView]-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_dummyView)];
+        NSArray* dummyViewH = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_dummyView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_dummyView)];
         
-        NSArray* dummyViewV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[_dummyView(==54)][_likeDislikeView]" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_likeDislikeView,_dummyView)];
+        NSArray* dummyViewV = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_dummyView(==54)][_likeDislikeView]" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_likeDislikeView,_dummyView)];
         
         [self.view addConstraints:hC];
         [self.view addConstraint:vC];
-        [_cancelView addConstraint:hL];
-        [_cancelView addConstraint:vL];
         [_activityContainerView addConstraints:h];
         [_activityContainerView addConstraints:v];
-        [_activityContainerView addConstraints:likeDislikeViewH];
-        [_activityContainerView addConstraints:likeDislikeViewV];
+        [_cancelViewContainer addConstraints:cancelViewH];
+        [_cancelViewContainer addConstraints:cancelViewV];
+        [_cancelView addConstraint:hL];
+        [_cancelView addConstraint:vL];
+        [_activityContainerView addConstraints:upperContainerH];
+        [_activityContainerView addConstraints:upperContainerV];
+        [_upperContainer addConstraints:likeDislikeViewH];
+        [_upperContainer addConstraints:likeDislikeViewV];
         [_likeDislikeView addConstraint:hearthVerticalAlign];
         [_likeDislikeView addConstraint:hearthHorizontalAlign];
         [_likeDislikeView addConstraint:linedHearthVerticalAlign];
         [_likeDislikeView addConstraint:linedHearthHorizontalAlign];
-        [_activityContainerView addConstraints:dummyViewH];
-        [_activityContainerView addConstraints:dummyViewV];
+        [_upperContainer addConstraints:dummyViewH];
+        [_upperContainer addConstraints:dummyViewV];
         [_hearth addConstraint:hearthHSize];
         [_hearth addConstraint:hearthVSize];
         [_linedHearth addConstraint:linedHearthHSize];
@@ -247,11 +261,10 @@
     [super viewWillAppear:animated];
     [self.view layoutIfNeeded];
     
-    [_cancelView setRoundedCorners:UIRectCornerTopLeft|UIRectCornerTopRight|UIRectCornerBottomLeft|UIRectCornerBottomRight radius:CGSizeMake(12,12)];
-    [_likeDislikeView setRoundedCorners:UIRectCornerBottomLeft|UIRectCornerBottomRight radius:CGSizeMake(12,12)];
-    [_dummyView setRoundedCorners:UIRectCornerTopLeft|UIRectCornerTopRight radius:CGSizeMake(12,12)];
+    [_cancelViewContainer setRoundedCorners:UIRectCornerTopLeft|UIRectCornerTopRight|UIRectCornerBottomLeft|UIRectCornerBottomRight radius:CGSizeMake(12.0f,12.0f)];
+    [_upperContainer setRoundedCorners:UIRectCornerTopLeft radius:CGSizeMake(12.0f, 12.0f)];
     
-    UIView* hearthDivider = [[UIView alloc] initWithFrame:CGRectMake(CGRectGetMidX(_likeDislikeView.layer.mask.frame), 0, .5, _likeDislikeView.layer.mask.frame.size.height)];
+    UIView* hearthDivider = [[UIView alloc] initWithFrame:CGRectMake(CGRectGetMidX(_likeDislikeView.frame), 0, .5, _likeDislikeView.frame.size.height)];
     hearthDivider.backgroundColor = [UIColor blackColor];
     hearthDivider.alpha = .6f;
     [_likeDislikeView addSubview:hearthDivider];
@@ -266,6 +279,7 @@
     [super viewDidAppear:animated];
     _topConstraint.constant = -_activityContainerView.frame.size.height;
     [UIView animateWithDuration:.3f delay:.0f usingSpringWithDamping:.80 initialSpringVelocity:.0f options:0 animations:^{
+        _shadowView.hidden = NO;
         [self.view layoutIfNeeded];
     } completion:nil];
 }
@@ -274,8 +288,9 @@
     _topConstraint.constant = .0f;
     [UIView animateWithDuration:.3f delay:.0f usingSpringWithDamping:.80 initialSpringVelocity:.0f options:0 animations:^{
         [self.view layoutIfNeeded];
+        _shadowView.hidden = NO;
     } completion:^(BOOL finished){
-        [self dismissViewControllerAnimated:YES completion:nil];
+        [self dismissViewControllerAnimated:NO completion:nil];
     }];
     
 }
