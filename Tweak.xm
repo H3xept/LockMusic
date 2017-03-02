@@ -19,6 +19,20 @@
 
 #define BUNDLEPATH @"/Library/PreferenceBundles/lockmusicprefs.bundle"
 
+#define IS_IPHONE (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+#define IS_RETINA ([[UIScreen mainScreen] scale] >= 2.0)
+
+#define SCREEN_WIDTH ([[UIScreen mainScreen] bounds].size.width)
+#define SCREEN_HEIGHT ([[UIScreen mainScreen] bounds].size.height)
+#define SCREEN_MAX_LENGTH (MAX(SCREEN_WIDTH, SCREEN_HEIGHT))
+#define SCREEN_MIN_LENGTH (MIN(SCREEN_WIDTH, SCREEN_HEIGHT))
+#define IS_ZOOMED (IS_IPHONE && SCREEN_MAX_LENGTH == 736.0)
+
+#define IS_IPHONE_4_OR_LESS (IS_IPHONE && SCREEN_MAX_LENGTH < 568.0)
+#define IS_IPHONE_5 (IS_IPHONE && SCREEN_MAX_LENGTH == 568.0)
+#define IS_IPHONE_6 (IS_IPHONE && SCREEN_MAX_LENGTH == 667.0)
+#define IS_IPHONE_6P (IS_IPHONE && SCREEN_MAX_LENGTH >= 736.0)
+
 static NSMutableDictionary *preferences = nil;
 static CFStringRef applicationID = (__bridge CFStringRef)@"com.fl00d.lockmusicprefs";
 /* 
@@ -184,7 +198,14 @@ void refreshNotificationStatus(){
 			rc.origin = CGPointMake(20,40);
 			rc.size = CGSizeMake(120,120);
 		}else{
-			rc.origin.y -= frame.size.height/2 + 68;
+			if(IS_IPHONE_5){
+				rc.origin.y -= frame.size.height/2 + 68;
+			}else if(IS_IPHONE_6){
+				rc.origin.y -= frame.size.height/2 + 38;
+			}else if(IS_IPHONE_6P){
+				rc.origin.y -= frame.size.height/2 + 38;
+			}
+			
 		}
 		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
 			return;}
@@ -385,6 +406,10 @@ void refreshNotificationStatus(){
 	titlesView.frame = (aspect.previousTitleRect.size.width) ? aspect.previousTitleRect : titlesView.frame;
 	// --
 
+	aspect.previousTitleRect = newTitlesRect;
+	aspect.previousControlsRect = newControlsRect;
+	aspect.previousTimeRect = newTimeRect;
+
 	[[AspectController sharedInstance].artwork fakeSetFrame:CGRectZero];
 
 	if(newTitlesRect.origin.y == titlesView.frame.origin.y) return;
@@ -406,10 +431,6 @@ void refreshNotificationStatus(){
 	timeView.alpha = 1.0f;
 	transportControls.alpha = 1.0f;
 	titlesView.alpha = 1.0f;
-
-	aspect.previousTitleRect = titlesView.frame;
-	aspect.previousControlsRect = transportControls.frame;
-	aspect.previousTimeRect = timeView.frame;
 
 }
 
