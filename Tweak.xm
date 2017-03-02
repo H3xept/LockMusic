@@ -103,6 +103,7 @@ BOOL isEnabled(void)
 -(BOOL)banTrack;
 - (id)_nowPlayingInfo;
 -(BOOL)changeTrack:(int)arg1;
+- (BOOL)isPlaying;
 @end
 
 @interface AspectController : NSObject
@@ -299,7 +300,7 @@ void refreshNotificationStatus(){
 		[button addTarget:self
 		             action:@selector(musicButtonPressed)
 		   forControlEvents:UIControlEventTouchUpInside];
-		button.hidden = NO;
+		[AspectController sharedInstance].button.hidden = ![[objc_getClass("SBMediaController") sharedInstance] isPlaying];
 		[AspectController sharedInstance].button = button;
 	}
 }
@@ -314,6 +315,7 @@ void refreshNotificationStatus(){
 
 - (void)viewWillAppear:(BOOL)animated {
 	%orig(animated);
+	[AspectController sharedInstance].button.hidden = ![[objc_getClass("SBMediaController") sharedInstance]isPlaying];
 	[UIView setAnimationsEnabled:NO];
 	[[AspectController sharedInstance].artwork setFrame:[AspectController sharedInstance].originalArtworkSize];
 	[UIView setAnimationsEnabled:YES];
