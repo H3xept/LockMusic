@@ -4,7 +4,6 @@
 #include "LLIPC.h"
 #include "LLLog.h"
 
-#define __DBG__
 
 #ifdef __DBG__
 #define ASSERTALO assert(lllog_register_service("net.jndok.logserver") == 0)
@@ -225,11 +224,40 @@ void refreshNotificationStatus(){
 %new
 - (void)musicButtonPressed{
 
-#define belloColor [UIColor colorWithRed:1.00 green:0.18 blue:0.33 alpha:1.0]
+	#define belloColor [UIColor colorWithRed:1.00 green:0.18 blue:0.33 alpha:1.0]
 
-	YoloViewController* yoloVC = [[YoloViewController alloc] init];
-	[yoloVC setModalPresentationStyle:UIModalPresentationOverCurrentContext];
-	[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:yoloVC animated:NO completion:nil];
+    UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+
+    [actionSheet addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+
+    }]];
+
+	UIAlertAction* shuffle = [UIAlertAction actionWithTitle:@"Next shuffle track" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+		[[objc_getClass("SBMediaController") sharedInstance] changeTrack:6];
+	}];
+    [actionSheet addAction:shuffle];
+
+    UIAlertAction* like = [UIAlertAction actionWithTitle:@"Like" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+		[[objc_getClass("SBMediaController") sharedInstance] likeTrack];
+    }];
+    [like setValue:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth" ofType:@"png"]] forKey:@"image"];
+    [like setValue:belloColor forKey:@"imageTintColor"];
+    [actionSheet addAction:like];
+
+	UIAlertAction* dislike = [UIAlertAction actionWithTitle:@"Dislike" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+		[[objc_getClass("SBMediaController") sharedInstance] banTrack];
+	}];
+    [dislike setValue:belloColor forKey:@"imageTintColor"];
+    [dislike setValue:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Line" ofType:@"png"]] forKey:@"image"];
+    [actionSheet addAction:dislike];
+
+	[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:actionSheet animated:YES completion:nil];
+
+// #define belloColor [UIColor colorWithRed:1.00 green:0.18 blue:0.33 alpha:1.0]
+
+// 	YoloViewController* yoloVC = [[YoloViewController alloc] init];
+// 	[yoloVC setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+// 	[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:yoloVC animated:NO completion:nil];
 
 }
 
