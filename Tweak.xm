@@ -4,13 +4,16 @@
 #include "LLIPC.h"
 #include "LLLog.h"
 
-#define __DBG__
+// #define __DBG__
+
 #ifdef __DBG__
+#define ASSERTALO assert(lllog_register_service("net.jndok.logserver") == 0)
 #define LOG(X) LLLogPrint((char*)X)
 #define FLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%f",X] UTF8String])
 #define FRLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%@",NSStringFromCGRect(X)] UTF8String])
 #else
 #define LOG(X)
+#define ASSERTALO
 #define FLOG(X)
 #define FRLOG(X)
 #endif
@@ -23,7 +26,8 @@ static CFStringRef applicationID = (__bridge CFStringRef)@"com.fl00d.lockmusicpr
 static void LoadPreferences();
 
 %ctor{
-    //assert(lllog_register_service("net.jndok.logserver") == 0);
+    
+    ASSERTALO;
 
 	static dispatch_once_t onceToken;
 
