@@ -358,10 +358,12 @@ void refreshNotificationStatus(){
 	transportControls.frame = (aspect.previousControlsRect.size.width) ? aspect.previousControlsRect : transportControls.frame;
 	titlesView.frame = (aspect.previousTitleRect.size.width) ? aspect.previousTitleRect : titlesView.frame;
 	// --
-	
-	if(newTitlesRect.origin.y == titlesView.frame.origin.y) return;
 
 	[[AspectController sharedInstance].artwork fakeSetFrame:CGRectZero];
+
+	if(newTitlesRect.origin.y == titlesView.frame.origin.y) return;
+
+	
 	[UIView setAnimationsEnabled:NO];
 
 	timeView.alpha = .0f;
