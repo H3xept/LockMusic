@@ -263,28 +263,26 @@ void refreshNotificationStatus(){
 
 %hook MPULockScreenMediaControlsViewController
 
-- (void)viewWillAppear:(BOOL)animated{
+- (void)viewWillAppear:(BOOL)animated {
 	%orig(animated);
-	// [AspectController sharedInstance].button.hidden = ![[objc_getClass("SBMediaController") sharedInstance]isPlaying];
 	[UIView setAnimationsEnabled:NO];
 	[[AspectController sharedInstance].artwork setFrame:[AspectController sharedInstance].originalArtworkSize];
 	[UIView setAnimationsEnabled:YES];
 }
 
-// Maybe readd later with better handling
-// -(void)nowPlayingController:(id)arg1 playbackStateDidChange:(BOOL)arg2{
-// 	%orig(arg1,arg2);
+-(void)nowPlayingController:(id)arg1 playbackStateDidChange:(BOOL)arg2{
+	%orig(arg1,arg2);
 
-//     if (!isEnabled()) {
-//         return;
-//     }
+    if (!isEnabled()) {
+        return;
+    }
 
-// 	if(arg2){
-// 		[AspectController sharedInstance].button.hidden = NO;
-// 	}else{
-// 		[AspectController sharedInstance].button.hidden = YES;
-// 	}
-// }
+	if(arg2){
+		[AspectController sharedInstance].button.hidden = NO;
+	}else{
+		[AspectController sharedInstance].button.hidden = YES;
+	}
+}
 %end
 
 %hook MPULockScreenMediaControlsView

@@ -145,8 +145,8 @@ kLikedStateNone,kLikedStateLike,kLikedStateDislike
         
         UIButton* hearth = [UIButton buttonWithType:UIButtonTypeCustom];
         hearth.adjustsImageWhenHighlighted = NO;
-        hearth.activatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth" ofType:@"png"]];
-        hearth.deactivatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth" ofType:@"png"]];
+        hearth.activatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Filled" ofType:@"png"]];
+        hearth.deactivatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Empty" ofType:@"png"]];
         if(likedState == kLikedStateNone || likedState == kLikedStateDislike) [hearth deactivate];
         else [hearth activate];
 
@@ -158,8 +158,8 @@ kLikedStateNone,kLikedStateLike,kLikedStateDislike
         
         UIButton* linedHearth = [UIButton buttonWithType:UIButtonTypeCustom];
         linedHearth.adjustsImageWhenHighlighted = NO;
-        linedHearth.activatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Line" ofType:@"png"]];
-        linedHearth.deactivatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Line" ofType:@"png"]];
+        linedHearth.activatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Lined_Filled" ofType:@"png"]];
+        linedHearth.deactivatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Lined_Empty" ofType:@"png"]];
         if(likedState == kLikedStateNone || likedState == kLikedStateLike) [_linedHearth activate];
         else [_linedHearth activate];
         linedHearth.translatesAutoresizingMaskIntoConstraints = NO;
