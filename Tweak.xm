@@ -4,7 +4,7 @@
 #include "LLIPC.h"
 #include "LLLog.h"
 
-#define __DBG__ 
+#define __DBG__
 #ifdef __DBG__
 #define LOG(X) LLLogPrint((char*)X)
 #define FLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%f",X] UTF8String])
@@ -23,8 +23,7 @@ static CFStringRef applicationID = (__bridge CFStringRef)@"com.fl00d.lockmusicpr
 static void LoadPreferences();
 
 %ctor{
-
-    assert(lllog_register_service("net.jndok.logserver") == 0);
+    //assert(lllog_register_service("net.jndok.logserver") == 0);
 
 	static dispatch_once_t onceToken;
 
@@ -39,11 +38,12 @@ static void LoadPreferences();
 	        LoadPreferences();
 	    });
 
+    LoadPreferences();
 }
 
 BOOL isEnabled(void)
-{	
-	BOOL rt =  (preferences) ? [preferences[@"kEnabled"] boolValue] : NO;
+{
+	BOOL rt =  (preferences) ? [preferences[@"kEnabled"] boolValue] : YES;
 	return rt;
 }
 
@@ -346,7 +346,7 @@ void refreshNotificationStatus(){
 	aspect.previousTitleRect = titlesView.frame;
 	aspect.previousControlsRect = transportControls.frame;
 	aspect.previousTimeRect = timeView.frame;
-	
+
 	//Setup
 	timeView.frame = (aspect.previousTimeRect.size.width) ? aspect.previousTimeRect : timeView.frame;
 	transportControls.frame = (aspect.previousControlsRect.size.width) ? aspect.previousControlsRect : transportControls.frame;
@@ -423,4 +423,3 @@ void refreshNotificationStatus(){
         object:nil];
 }
 %end
-
