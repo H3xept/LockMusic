@@ -22,6 +22,13 @@
 
 static NSMutableDictionary *preferences = nil;
 static CFStringRef applicationID = (__bridge CFStringRef)@"com.fl00d.lockmusicprefs";
+/* 
+1:Nothing
+2:Like
+3:Dislike
+*/
+extern long long likedState;
+
 
 static void LoadPreferences();
 
@@ -428,4 +435,15 @@ void refreshNotificationStatus(){
         postNotificationName:@"refresh.lock"
         object:nil];
 }
+
+%end
+
+%hook MPUTransportControlMediaRemoteController
+
+-(void)_updateLikedState
+{
+    %orig();
+    likedState = MSHookIvar<long long>(self, "_likedState");
+}
+
 %end

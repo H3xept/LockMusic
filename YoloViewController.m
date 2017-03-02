@@ -4,6 +4,11 @@
 #define BUNDLEPATH @"/Library/PreferenceBundles/lockmusicprefs.bundle"
 #define ios10Blue [UIColor colorWithRed:0.00 green:0.48 blue:1.00 alpha:1.0]
 
+long long likedState;
+typedef enum{
+kLikedStateNone,kLikedStateLike,kLikedStateDislike
+}kLikedState;
+
 @interface UIView (RoundedCorners)
 
 - (void)setRoundedCorners:(UIRectCorner)corners radius:(CGSize)size;
@@ -142,7 +147,9 @@
         hearth.adjustsImageWhenHighlighted = NO;
         hearth.activatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth" ofType:@"png"]];
         hearth.deactivatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth" ofType:@"png"]];
-        [hearth deactivate];
+        if(likedState == kLikedStateNone || likedState == kLikedStateDislike) [hearth deactivate];
+        else [hearth activate];
+
         hearth.titleLabel.text = @"AY";
         hearth.opaque = YES;
         hearth.translatesAutoresizingMaskIntoConstraints = NO;
@@ -153,7 +160,8 @@
         linedHearth.adjustsImageWhenHighlighted = NO;
         linedHearth.activatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Line" ofType:@"png"]];
         linedHearth.deactivatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Line" ofType:@"png"]];
-        [linedHearth deactivate];
+        if(likedState == kLikedStateNone || likedState == kLikedStateLike) [_linedHearth activate];
+        else [_linedHearth activate];
         linedHearth.translatesAutoresizingMaskIntoConstraints = NO;
         [linedHearth addTarget:self action:@selector(hearthhasBeenReleased:) forControlEvents:UIControlEventTouchUpInside];
         [linedHearth addTarget:self action:@selector(hearthhasBeenPressed:) forControlEvents:UIControlEventTouchDown];
