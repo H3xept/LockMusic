@@ -332,11 +332,10 @@ void refreshNotificationStatus(){
 	CGRect newControlsRect = transportControls.frame;
 
 	AspectController* aspect = [AspectController sharedInstance];
+	BOOL rt = NO;
+	if(aspect.previousTimeRect.origin.y == timeView.frame.origin.y)rt=YES;
 
-	LOG("Titles:");
-	FRLOG(titlesView.frame);
-	LOG("Time:");
-	FRLOG(timeView.frame);
+	if(rt)return;
 
 	if([AspectController sharedInstance].notificationsPresent){
 		newVolumeRect.origin.y = -100;
@@ -354,17 +353,13 @@ void refreshNotificationStatus(){
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-150;
 	}
 
-	if(newTitlesRect.origin.y == titlesView.frame.origin.y) return;
-
-	aspect.previousTitleRect = titlesView.frame;
-	aspect.previousControlsRect = transportControls.frame;
-	aspect.previousTimeRect = timeView.frame;
-
 	//Setup
 	timeView.frame = (aspect.previousTimeRect.size.width) ? aspect.previousTimeRect : timeView.frame;
 	transportControls.frame = (aspect.previousControlsRect.size.width) ? aspect.previousControlsRect : transportControls.frame;
 	titlesView.frame = (aspect.previousTitleRect.size.width) ? aspect.previousTitleRect : titlesView.frame;
 	// --
+	
+	if(newTitlesRect.origin.y == titlesView.frame.origin.y) return;
 
 	[[AspectController sharedInstance].artwork fakeSetFrame:CGRectZero];
 	[UIView setAnimationsEnabled:NO];
@@ -383,6 +378,10 @@ void refreshNotificationStatus(){
 	timeView.alpha = 1.0f;
 	transportControls.alpha = 1.0f;
 	titlesView.alpha = 1.0f;
+
+	aspect.previousTitleRect = titlesView.frame;
+	aspect.previousControlsRect = transportControls.frame;
+	aspect.previousTimeRect = timeView.frame;
 
 }
 
