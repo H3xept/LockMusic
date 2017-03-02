@@ -4,7 +4,7 @@
 #include "LLIPC.h"
 #include "LLLog.h"
 
-// #define __DBG__
+#define __DBG__
 
 #ifdef __DBG__
 #define ASSERTALO assert(lllog_register_service("net.jndok.logserver") == 0)
@@ -243,7 +243,7 @@ void refreshNotificationStatus(){
 		[button addTarget:self
 		             action:@selector(musicButtonPressed)
 		   forControlEvents:UIControlEventTouchUpInside];
-		button.hidden = YES;
+		button.hidden = NO;
 		[AspectController sharedInstance].button = button;
 	}
 }
@@ -258,25 +258,26 @@ void refreshNotificationStatus(){
 
 - (void)viewWillAppear:(BOOL)animated{
 	%orig(animated);
-	[AspectController sharedInstance].button.hidden = ![[objc_getClass("SBMediaController") sharedInstance]isPlaying];
+	// [AspectController sharedInstance].button.hidden = ![[objc_getClass("SBMediaController") sharedInstance]isPlaying];
 	[UIView setAnimationsEnabled:NO];
 	[[AspectController sharedInstance].artwork setFrame:[AspectController sharedInstance].originalArtworkSize];
 	[UIView setAnimationsEnabled:YES];
 }
 
--(void)nowPlayingController:(id)arg1 playbackStateDidChange:(BOOL)arg2{
-	%orig(arg1,arg2);
+// Maybe readd later with better handling
+// -(void)nowPlayingController:(id)arg1 playbackStateDidChange:(BOOL)arg2{
+// 	%orig(arg1,arg2);
 
-    if (!isEnabled()) {
-        return;
-    }
+//     if (!isEnabled()) {
+//         return;
+//     }
 
-	if(arg2){
-		[AspectController sharedInstance].button.hidden = NO;
-	}else{
-		[AspectController sharedInstance].button.hidden = YES;
-	}
-}
+// 	if(arg2){
+// 		[AspectController sharedInstance].button.hidden = NO;
+// 	}else{
+// 		[AspectController sharedInstance].button.hidden = YES;
+// 	}
+// }
 %end
 
 %hook MPULockScreenMediaControlsView
@@ -345,6 +346,7 @@ void refreshNotificationStatus(){
 		newTitlesRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-120-50;
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-150;
 	}
+
 	if(newTitlesRect.origin.y == titlesView.frame.origin.y) return;
 
 	aspect.previousTitleRect = titlesView.frame;
