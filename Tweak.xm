@@ -1,5 +1,6 @@
 #import <rocketbootstrap/rocketbootstrap.h>
 #import "YoloViewController.h"
+#import "SharedHelper.h"
 
 #include "LLIPC.h"
 #include "LLLog.h"
@@ -10,6 +11,7 @@
 #define ASSERTALO assert(lllog_register_service("net.jndok.logserver") == 0)
 #define LOG(X) LLLogPrint((char*)X)
 #define FLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%f",X] UTF8String])
+#define DLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%lld",X] UTF8String])
 #define FRLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%@",NSStringFromCGRect(X)] UTF8String])
 #else
 #define LOG(X)
@@ -41,7 +43,6 @@ static CFStringRef applicationID = (__bridge CFStringRef)@"com.fl00d.lockmusicpr
 2:Like
 3:Dislike
 */
-extern long long likedState;
 
 
 static void LoadPreferences();
@@ -60,7 +61,6 @@ static void LoadPreferences();
 	                               	(__bridge CFStringRef)@"LockMusicPrefsChangedNotification",
 	                               	NULL,
 	                               	CFNotificationSuspensionBehaviorDeliverImmediately);
-	        LoadPreferences();
 	    });
 
     LoadPreferences();
@@ -97,7 +97,13 @@ BOOL isEnabled(void)
 @end
 @interface SBMainScreenAlertWindowViewController:UIViewController
 @end
-
+@interface SBBacklightController : NSObject
++ (instancetype)sharedInstance;
+-(void)resetLockScreenIdleTimer;
+@end
+@interface MPUTransportControlMediaRemoteController:NSObject
+- (long long)likedState;
+@end
 @interface SBMediaController:NSObject
 +(id)sharedInstance;
 -(BOOL)likeTrack;
@@ -277,11 +283,12 @@ void refreshNotificationStatus(){
 	// [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:actionSheet animated:YES completion:nil];
 
 #define belloColor [UIColor colorWithRed:1.00 green:0.18 blue:0.33 alpha:1.0]
-
-	YoloViewController* yoloVC = [[YoloViewController alloc] init];
-	[yoloVC setModalPresentationStyle:UIModalPresentationOverCurrentContext];
-	[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:yoloVC animated:NO completion:nil];
-
+	if([SharedHelper sharedInstance].isMusicApp){
+		YoloViewController* yoloVC = [[YoloViewController alloc] init];
+		[yoloVC setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+		[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:yoloVC animated:NO completion:nil];
+		[SharedHelper sharedInstance].panelActive = YES;
+	}
 }
 
 -(void)layoutSubviews{
@@ -294,7 +301,6 @@ void refreshNotificationStatus(){
 		UIScrollView* scroll = MSHookIvar<UIScrollView *>(self, "_scrollView");
 		[button setImage:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Group" ofType:@"png"]] forState:UIControlStateNormal];
 		button.frame = CGRectMake([UIScreen mainScreen].bounds.size.width*2-(48), [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f);
-
 		button.contentMode = UIViewContentModeBottom;
 		[scroll addSubview:button];
 		[button addTarget:self
@@ -302,8 +308,15 @@ void refreshNotificationStatus(){
 		   forControlEvents:UIControlEventTouchUpInside];
 		[AspectController sharedInstance].button = button;
 	}
-	[AspectController sharedInstance].button.hidden = ![[objc_getClass("SBMediaController") sharedInstance] isPlaying];
-}
+
+	LOG("IS MUS");
+	DLOG((long long)[SharedHelper sharedInstance].isMusicApp);
+
+	if([[objc_getClass("SBMediaController") sharedInstance] isPlaying]){
+		if([SharedHelper sharedInstance].isMusicApp){
+			[AspectController sharedInstance].button.hidden = NO;
+		}else [AspectController sharedInstance].button.hidden = YES;
+	}else [AspectController sharedInstance].button.hidden = YES;}
 
 %end
 
@@ -318,7 +331,13 @@ void refreshNotificationStatus(){
     if (!isEnabled()) {
         return;
     }
-	[AspectController sharedInstance].button.hidden = ![[objc_getClass("SBMediaController") sharedInstance]isPlaying];
+
+	if([[objc_getClass("SBMediaController") sharedInstance] isPlaying]){
+		if([SharedHelper sharedInstance].isMusicApp){
+			[AspectController sharedInstance].button.hidden = NO;
+		}else [AspectController sharedInstance].button.hidden = YES;
+	}else [AspectController sharedInstance].button.hidden = YES;
+
 	[UIView setAnimationsEnabled:NO];
 	[[AspectController sharedInstance].artwork setFrame:[AspectController sharedInstance].originalArtworkSize];
 	[UIView setAnimationsEnabled:YES];
@@ -331,11 +350,12 @@ void refreshNotificationStatus(){
         return;
     }
 
-	if(arg2){
-		[AspectController sharedInstance].button.hidden = NO;
-	}else{
-		[AspectController sharedInstance].button.hidden = YES;
-	}
+	if([[objc_getClass("SBMediaController") sharedInstance] isPlaying]){
+		if([SharedHelper sharedInstance].isMusicApp){
+			[AspectController sharedInstance].button.hidden = NO;
+		}else [AspectController sharedInstance].button.hidden = YES;
+	}else [AspectController sharedInstance].button.hidden = YES;
+	
 }
 %end
 
@@ -483,7 +503,6 @@ void refreshNotificationStatus(){
     if (!isEnabled()) {
     	return;
     }
-
 	[[NSNotificationCenter defaultCenter]
         postNotificationName:@"refresh.lock"
         object:nil];
@@ -496,7 +515,30 @@ void refreshNotificationStatus(){
 -(void)_updateLikedState
 {
     %orig();
-    likedState = MSHookIvar<long long>(self, "_likedState");
+    if([self likedState] != [SharedHelper sharedInstance].songState){
+    	DLOG([self likedState]);
+    	[SharedHelper sharedInstance].songState = [self likedState];
+    	[[SharedHelper sharedInstance] notifyPaneOfSongStateUpdate];
+    }
+    
 }
 
+%end
+
+%hook SBBacklightController
+-(void)_animateBacklightToFactor:(float)factor duration:(double)duration source:(int)source silently:(BOOL)silently completion:(id)completion{
+	if(factor > 0){
+		%orig;
+	}else if(![SharedHelper sharedInstance].panelActive){
+		%orig;
+	}
+}
+%end
+
+%hook MPUNowPlayingMetadata
+- (BOOL)isMusicApp{
+	BOOL rt = %orig;
+	[SharedHelper sharedInstance].isMusicApp = rt;
+	return rt;
+}
 %end
