@@ -4,6 +4,11 @@
     BOOL hasBeenSetup;
 }
 
+/* 
+1:Nothing
+2:Like
+3:Dislike
+*/
 typedef enum{
 kLikedStateNone,kLikedStateLike,kLikedStateDislike
 }kLikedState;

@@ -4,6 +4,12 @@
 <dict>
 	<key>items</key>
 	<array>
+        <dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>headerCellClass</key>
+			<string>LockMusicHeaderCell</string>
+		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
@@ -28,6 +34,43 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
+			<string>Lockscreen Bottom Menu</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.fl00d.lockmusicprefs</string>
+			<key>key</key>
+			<string>kDotsEnabled</string>
+			<key>label</key>
+			<string>Enabled</string>
+			<key>PostNotification</key>
+			<string>LockMusicPrefsChangedNotification</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSegmentCell</string>
+			<key>default</key><real>1</real>
+			<key>defaults</key><string>com.fl00d.lockmusicprefs</string>
+			<key>key</key><string>kDotsPositioning</string>
+		<key>validTitles</key>
+		<array>
+			<string>Left</string>
+			<string>Right</string>
+		</array>
+		<key>validValues</key>
+		<array>
+			<real>0</real>
+			<real>1</real>
+		</array>
+			<key>PostNotification</key><string>LockMusicPrefsChangedNotification</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
 			<string>More features coming soon</string>
 		</dict>
 		<dict>
@@ -35,6 +78,20 @@
 			<string>PSStaticTextCell</string>
 			<key>label</key>
 			<string>Thanks so much for your support!</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>default</key><true/>
+			<key>action</key><string>bugToNopteam</string>
+			<key>defaults</key><string>com.fl00d.lockmusicprefs</string>
+			<key>label</key><string>Found a bug? 🐛</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>default</key><true/>
+			<key>action</key><string>ideaToNopteam</string>
+			<key>defaults</key><string>com.fl00d.lockmusicprefs</string>
+			<key>label</key><string>Any ideas? 💡</string>
 		</dict>
 	</array>
 	<key>title</key>

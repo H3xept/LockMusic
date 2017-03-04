@@ -5,8 +5,6 @@
 #include "LLIPC.h"
 #include "LLLog.h"
 
-#define __DBG__
-
 #ifdef __DBG__
 #define ASSERTALO assert(lllog_register_service("net.jndok.logserver") == 0)
 #define LOG(X) LLLogPrint((char*)X)
@@ -21,6 +19,7 @@
 #endif
 
 #define BUNDLEPATH @"/Library/PreferenceBundles/lockmusicprefs.bundle"
+#define CAMERASHYPREFLOCATION @"/Library/PreferenceBundles/cameraShyPrefs.bundle"
 
 #define IS_IPHONE (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
 #define IS_RETINA ([[UIScreen mainScreen] scale] >= 2.0)
@@ -38,12 +37,6 @@
 
 static NSMutableDictionary *preferences = nil;
 static CFStringRef applicationID = (__bridge CFStringRef)@"com.fl00d.lockmusicprefs";
-/* 
-1:Nothing
-2:Like
-3:Dislike
-*/
-
 
 static void LoadPreferences();
 
@@ -61,6 +54,8 @@ static void LoadPreferences();
 	                               	(__bridge CFStringRef)@"LockMusicPrefsChangedNotification",
 	                               	NULL,
 	                               	CFNotificationSuspensionBehaviorDeliverImmediately);
+	    
+	LoadPreferences();
 	    });
 
     LoadPreferences();
@@ -69,6 +64,18 @@ static void LoadPreferences();
 BOOL isEnabled(void)
 {
 	BOOL rt =  (preferences) ? [preferences[@"kEnabled"] boolValue] : YES;
+	return rt;
+}
+
+BOOL threeDotsEnabled(void)
+{
+	BOOL rt = (preferences) ? [preferences[@"kDotsEnabled"] boolValue] : YES;
+	return rt;
+}
+
+unsigned int threeDotsPositioning(void)
+{
+	BOOL rt = (preferences) ? [preferences[@"kDotsPositioning"] integerValue] : 1;
 	return rt;
 }
 
@@ -252,36 +259,6 @@ void refreshNotificationStatus(){
 
 %new
 - (void)musicButtonPressed{
-
-	// #define belloColor [UIColor colorWithRed:1.00 green:0.18 blue:0.33 alpha:1.0]
-
- //    UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-
- //    [actionSheet addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-
- //    }]];
-
-	// UIAlertAction* shuffle = [UIAlertAction actionWithTitle:@"Next shuffle track" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-	// 	[[objc_getClass("SBMediaController") sharedInstance] changeTrack:6];
-	// }];
- //    [actionSheet addAction:shuffle];
-
- //    UIAlertAction* like = [UIAlertAction actionWithTitle:@"Like" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-	// 	[[objc_getClass("SBMediaController") sharedInstance] likeTrack];
- //    }];
- //    [like setValue:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth" ofType:@"png"]] forKey:@"image"];
- //    [like setValue:belloColor forKey:@"imageTintColor"];
- //    [actionSheet addAction:like];
-
-	// UIAlertAction* dislike = [UIAlertAction actionWithTitle:@"Dislike" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-	// 	[[objc_getClass("SBMediaController") sharedInstance] banTrack];
-	// }];
- //    [dislike setValue:belloColor forKey:@"imageTintColor"];
- //    [dislike setValue:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Line" ofType:@"png"]] forKey:@"image"];
- //    [actionSheet addAction:dislike];
-
-	// [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:actionSheet animated:YES completion:nil];
-
 #define belloColor [UIColor colorWithRed:1.00 green:0.18 blue:0.33 alpha:1.0]
 	if([SharedHelper sharedInstance].isMusicApp){
 		YoloViewController* yoloVC = [[YoloViewController alloc] init];
@@ -296,11 +273,16 @@ void refreshNotificationStatus(){
     if (!isEnabled()) {
         return;
     }
-    if(![AspectController sharedInstance].button.superview){
+    if(![AspectController sharedInstance].button.superview && threeDotsEnabled()){
 		UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
 		UIScrollView* scroll = MSHookIvar<UIScrollView *>(self, "_scrollView");
 		[button setImage:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Group" ofType:@"png"]] forState:UIControlStateNormal];
-		button.frame = CGRectMake([UIScreen mainScreen].bounds.size.width*2-(48), [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f);
+		
+		CGRect dotsRect = (threeDotsPositioning()) ? 
+			 CGRectMake([UIScreen mainScreen].bounds.size.width*2-(48), [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f) :
+			 CGRectMake([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f);
+
+		button.frame = dotsRect;
 		button.contentMode = UIViewContentModeBottom;
 		[scroll addSubview:button];
 		[button addTarget:self
@@ -308,9 +290,6 @@ void refreshNotificationStatus(){
 		   forControlEvents:UIControlEventTouchUpInside];
 		[AspectController sharedInstance].button = button;
 	}
-
-	LOG("IS MUS");
-	DLOG((long long)[SharedHelper sharedInstance].isMusicApp);
 
 	if([[objc_getClass("SBMediaController") sharedInstance] isPlaying]){
 		if([SharedHelper sharedInstance].isMusicApp){
@@ -350,12 +329,12 @@ void refreshNotificationStatus(){
         return;
     }
 
-	if([[objc_getClass("SBMediaController") sharedInstance] isPlaying]){
+	if(arg2){
 		if([SharedHelper sharedInstance].isMusicApp){
 			[AspectController sharedInstance].button.hidden = NO;
 		}else [AspectController sharedInstance].button.hidden = YES;
 	}else [AspectController sharedInstance].button.hidden = YES;
-	
+
 }
 %end
 
@@ -516,11 +495,9 @@ void refreshNotificationStatus(){
 {
     %orig();
     if([self likedState] != [SharedHelper sharedInstance].songState){
-    	DLOG([self likedState]);
     	[SharedHelper sharedInstance].songState = [self likedState];
     	[[SharedHelper sharedInstance] notifyPaneOfSongStateUpdate];
     }
-    
 }
 
 %end
@@ -530,6 +507,7 @@ void refreshNotificationStatus(){
 	if(factor > 0){
 		%orig;
 	}else if(![SharedHelper sharedInstance].panelActive){
+		[AspectController sharedInstance].button.hidden = YES;
 		%orig;
 	}
 }

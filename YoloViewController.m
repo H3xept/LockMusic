@@ -189,7 +189,6 @@
         hearth.deactivatedImage = [[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Hearth_Empty" ofType:@"png"]];
         [hearth activate];
 
-        hearth.titleLabel.text = @"AY";
         hearth.opaque = YES;
         hearth.translatesAutoresizingMaskIntoConstraints = NO;
         [hearth addTarget:self action:@selector(hearthhasBeenReleased:) forControlEvents:UIControlEventTouchUpInside];
