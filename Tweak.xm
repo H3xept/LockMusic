@@ -409,8 +409,13 @@ void refreshNotificationStatus(){
 		volumeView.alpha = (volumeSliderEnabledForMode1()) ? 1.0f:.0f;
 		[UIView setAnimationsEnabled:YES];
 
-		newVolumeRect.origin.y = volumeModifier+148;
-		newTimeRect.origin.y = 160;
+		if(IS_IPHONE_5){
+			newVolumeRect.origin.y = volumeModifier+148;
+			newTimeRect.origin.y = 154;
+		}else{
+			newVolumeRect.origin.y = volumeModifier+150;
+			newTimeRect.origin.y = 160;
+		}
 		newTitlesRect.origin.y = 30;
 		newTitlesRect.origin.x = 120+10-5;
 		newTitlesRect.size.width = [UIScreen mainScreen].bounds.size.width-120-40;
