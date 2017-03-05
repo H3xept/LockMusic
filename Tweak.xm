@@ -410,7 +410,7 @@ void refreshNotificationStatus(){
 		[UIView setAnimationsEnabled:YES];
 
 		if(IS_IPHONE_5){
-			newVolumeRect.origin.y = volumeModifier+148;
+			newVolumeRect.origin.y = volumeModifier+144;
 			newTimeRect.origin.y = 154;
 		}else{
 			newVolumeRect.origin.y = volumeModifier+150;
