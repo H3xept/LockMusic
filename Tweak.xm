@@ -79,6 +79,16 @@ unsigned int threeDotsPositioning(void)
 	return rt;
 }
 
+BOOL volumeSliderEnabledForMode0(void)
+{
+	return (preferences) ? [preferences[@"kVolumeSliderEnabledMode0"] boolValue] : NO;
+}
+
+BOOL volumeSliderEnabledForMode1(void)
+{
+	return (preferences) ? [preferences[@"kVolumeSliderEnabledMode1"] boolValue] : NO;
+}
+
 @interface SBDashBoardMediaArtworkViewController:UIViewController
 @end
 @interface MPUMediaRemoteControlsView:UIView
@@ -125,6 +135,7 @@ unsigned int threeDotsPositioning(void)
 @property (nonatomic) CGRect previousTimeRect;
 @property (nonatomic) CGRect previousControlsRect;
 @property (nonatomic) CGRect previousTitleRect;
+@property (nonatomic) CGRect previousVolumeRect;
 @property (nonatomic) CGRect previousArtworkRect;
 @property (nonatomic,strong) MPUNowPlayingArtworkView* artwork;
 @property (nonatomic,strong) UIButton* button;
@@ -153,6 +164,10 @@ static void LoadPreferences() {
             CFRelease(keyList);
         }
     }
+
+	[[NSNotificationCenter defaultCenter]
+        postNotificationName:@"refresh.lock"
+        object:nil];
 }
 
 void refreshNotificationStatus(){
@@ -375,8 +390,6 @@ void refreshNotificationStatus(){
 	UIView* titlesView = MSHookIvar<MPUMediaControlsTitlesView *>(self, "_titlesView");
 	UIView* transportControls = MSHookIvar<MPUTransportControlsView *>(self, "_transportControls");
 
-	volumeView.alpha = .0f;
-
 	CGRect newVolumeRect = volumeView.frame;
 	CGRect newTimeRect = timeView.frame;
 	CGRect newTitlesRect = titlesView.frame;
@@ -385,11 +398,16 @@ void refreshNotificationStatus(){
 	AspectController* aspect = [AspectController sharedInstance];
 	BOOL rt = NO;
 	if(aspect.previousTimeRect.origin.y == timeView.frame.origin.y)rt=YES;
-
 	if(rt)return;
 
+	double volumeModifier = (volumeSliderEnabledForMode1()||volumeSliderEnabledForMode0()) ? volumeView.bounds.size.height+8.0f:.0f;
+	double volumeScreenHeightDelta = (volumeSliderEnabledForMode0()) ? -156+volumeModifier:.0f;
+	double controlsVolumeModifier = (volumeSliderEnabledForMode0()) ? 18.0f:.0f;
+
 	if([AspectController sharedInstance].notificationsPresent){
-		newVolumeRect.origin.y = -100;
+		volumeView.alpha = (volumeSliderEnabledForMode1()) ? 1.0f:.0f;
+
+		newVolumeRect.origin.y = volumeModifier+150;
 		newTimeRect.origin.y = 160;
 		newTitlesRect.origin.y = 30;
 		newTitlesRect.origin.x = 120+10-5;
@@ -398,21 +416,25 @@ void refreshNotificationStatus(){
 		newControlsRect.size.width = newTitlesRect.size.width-20;
 		newControlsRect.origin.x = [UIScreen mainScreen].bounds.size.width-(newTitlesRect.size.width/2 + newControlsRect.size.width/2 + 30+5);
 	}else{
-		newVolumeRect.origin.y = [UIScreen mainScreen].bounds.size.height+100;
+		volumeView.alpha = (volumeSliderEnabledForMode0()) ? 1.0f:.0f;
+
 		newTimeRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-100;
 		newTitlesRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-120-50;
-		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-150;
+		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-(150+controlsVolumeModifier);
+		newVolumeRect.origin.y = [UIScreen mainScreen].bounds.size.height+volumeScreenHeightDelta;
 	}
 
 	//Setup
 	timeView.frame = (aspect.previousTimeRect.size.width) ? aspect.previousTimeRect : timeView.frame;
-	transportControls.frame = (aspect.previousControlsRect.size.width) ? aspect.previousControlsRect : transportControls.frame;
 	titlesView.frame = (aspect.previousTitleRect.size.width) ? aspect.previousTitleRect : titlesView.frame;
+	volumeView.frame = (aspect.previousVolumeRect.size.width) ? aspect.previousVolumeRect : volumeView.frame;
+	transportControls.frame = (aspect.previousControlsRect.size.width) ? aspect.previousControlsRect : transportControls.frame;
 	// --
 
 	aspect.previousTitleRect = newTitlesRect;
 	aspect.previousControlsRect = newControlsRect;
 	aspect.previousTimeRect = newTimeRect;
+	aspect.previousVolumeRect = newVolumeRect;
 
 	[[AspectController sharedInstance].artwork fakeSetFrame:CGRectZero];
 
@@ -454,6 +476,12 @@ void refreshNotificationStatus(){
     CGPoint pointInTime = [timeView convertPoint:point fromView:self];
     if (CGRectContainsPoint(timeView.bounds, pointInTime)) {
         return [timeView hitTest:pointInTime withEvent:event];
+    }
+
+	UIView* volumeView = MSHookIvar<MPUTransportControlsView *>(self, "_volumeView");
+    CGPoint pointInVolume = [volumeView convertPoint:point fromView:self];
+    if (CGRectContainsPoint(volumeView.bounds, pointInVolume)) {
+        return [volumeView hitTest:pointInVolume withEvent:event];
     }
 
     return %orig(point,event);

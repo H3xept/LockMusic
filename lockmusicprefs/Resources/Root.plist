@@ -30,6 +30,43 @@
 			<key>PostNotification</key>
 			<string>LockMusicPrefsChangedNotification</string>
 		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Volume Controls</string>
+		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.fl00d.lockmusicprefs</string>
+			<key>key</key>
+			<string>kVolumeSliderEnabledMode0</string>
+			<key>label</key>
+			<string>Visible without notification</string>
+			<key>PostNotification</key>
+			<string>LockMusicPrefsChangedNotification</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.fl00d.lockmusicprefs</string>
+			<key>key</key>
+			<string>kVolumeSliderEnabledMode1</string>
+			<key>label</key>
+			<string>Visible with notification</string>
+			<key>PostNotification</key>
+			<string>LockMusicPrefsChangedNotification</string>
+		</dict>
+
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
@@ -67,6 +104,7 @@
 		</array>
 			<key>PostNotification</key><string>LockMusicPrefsChangedNotification</string>
 		</dict>
+
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
