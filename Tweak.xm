@@ -405,7 +405,9 @@ void refreshNotificationStatus(){
 	double controlsVolumeModifier = (volumeSliderEnabledForMode0()) ? 18.0f:.0f;
 
 	if([AspectController sharedInstance].notificationsPresent){
+		[UIView setAnimationsEnabled:NO];
 		volumeView.alpha = (volumeSliderEnabledForMode1()) ? 1.0f:.0f;
+		[UIView setAnimationsEnabled:YES];
 
 		newVolumeRect.origin.y = volumeModifier+150;
 		newTimeRect.origin.y = 160;
@@ -416,8 +418,10 @@ void refreshNotificationStatus(){
 		newControlsRect.size.width = newTitlesRect.size.width-20;
 		newControlsRect.origin.x = [UIScreen mainScreen].bounds.size.width-(newTitlesRect.size.width/2 + newControlsRect.size.width/2 + 30+5);
 	}else{
+		[UIView setAnimationsEnabled:NO];
 		volumeView.alpha = (volumeSliderEnabledForMode0()) ? 1.0f:.0f;
-
+		[UIView setAnimationsEnabled:YES];
+		
 		newTimeRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-100;
 		newTitlesRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-120-50;
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-(150+controlsVolumeModifier);
@@ -446,6 +450,7 @@ void refreshNotificationStatus(){
 	timeView.alpha = .0f;
 	transportControls.alpha = .0f;
 	titlesView.alpha = .0f;
+	volumeView.alpha = .0f;
 
 	transportControls.frame = newControlsRect;
 	volumeView.frame = newVolumeRect;
@@ -457,6 +462,9 @@ void refreshNotificationStatus(){
 	timeView.alpha = 1.0f;
 	transportControls.alpha = 1.0f;
 	titlesView.alpha = 1.0f;
+	if(([AspectController sharedInstance].notificationsPresent && volumeSliderEnabledForMode1()) || (![AspectController sharedInstance].notificationsPresent && volumeSliderEnabledForMode0()))
+		volumeView.alpha = 1.0f;
+
 
 }
 
