@@ -409,7 +409,7 @@ void refreshNotificationStatus(){
 		volumeView.alpha = (volumeSliderEnabledForMode1()) ? 1.0f:.0f;
 		[UIView setAnimationsEnabled:YES];
 
-		newVolumeRect.origin.y = volumeModifier+150;
+		newVolumeRect.origin.y = volumeModifier+148;
 		newTimeRect.origin.y = 160;
 		newTitlesRect.origin.y = 30;
 		newTitlesRect.origin.x = 120+10-5;
@@ -421,7 +421,7 @@ void refreshNotificationStatus(){
 		[UIView setAnimationsEnabled:NO];
 		volumeView.alpha = (volumeSliderEnabledForMode0()) ? 1.0f:.0f;
 		[UIView setAnimationsEnabled:YES];
-		
+
 		newTimeRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-100;
 		newTitlesRect.origin.y = [UIScreen mainScreen].bounds.size.height-100-120-50;
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-(150+controlsVolumeModifier);
