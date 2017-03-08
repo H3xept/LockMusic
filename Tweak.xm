@@ -6,7 +6,6 @@
 #include "LLIPC.h"
 #include "LLLog.h"
 
-#define __DBG__
 #ifdef __DBG__
 #define ASSERTALO assert(lllog_register_service("net.jndok.logserver") == 0)
 #define LOG(X) LLLogPrint((char*)X)
