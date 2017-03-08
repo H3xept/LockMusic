@@ -1,25 +1,28 @@
 #import <rocketbootstrap/rocketbootstrap.h>
 #import "YoloViewController.h"
 #import "SharedHelper.h"
+#import "FakeInterfaces.h"
 
 #include "LLIPC.h"
 #include "LLLog.h"
 
+#define __DBG__
 #ifdef __DBG__
 #define ASSERTALO assert(lllog_register_service("net.jndok.logserver") == 0)
 #define LOG(X) LLLogPrint((char*)X)
 #define FLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%f",X] UTF8String])
+#define BLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%d",X] UTF8String])
 #define DLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%lld",X] UTF8String])
 #define FRLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%@",NSStringFromCGRect(X)] UTF8String])
 #else
 #define LOG(X)
 #define ASSERTALO
 #define FLOG(X)
+#define BLOG(X)
 #define FRLOG(X)
 #endif
 
 #define BUNDLEPATH @"/Library/PreferenceBundles/lockmusicprefs.bundle"
-#define CAMERASHYPREFLOCATION @"/Library/PreferenceBundles/cameraShyPrefs.bundle"
 
 #define IS_IPHONE (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
 #define IS_RETINA ([[UIScreen mainScreen] scale] >= 2.0)
@@ -37,98 +40,33 @@
 
 static NSMutableDictionary *preferences = nil;
 static CFStringRef applicationID = (__bridge CFStringRef)@"com.fl00d.lockmusicprefs";
+NCNotificationListViewController* notificationController = nil;
 
 static void LoadPreferences();
 
 %ctor{
-    
+
     ASSERTALO;
-
 	static dispatch_once_t onceToken;
-
 	dispatch_once(&onceToken, ^{
-
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
                                     NULL,
 	                              	(CFNotificationCallback)LoadPreferences,
 	                               	(__bridge CFStringRef)@"LockMusicPrefsChangedNotification",
 	                               	NULL,
 	                               	CFNotificationSuspensionBehaviorDeliverImmediately);
-	    
-	LoadPreferences();
 	    });
-
     LoadPreferences();
+
 }
 
-BOOL isEnabled(void)
-{
-	BOOL rt =  (preferences) ? [preferences[@"kEnabled"] boolValue] : YES;
-	return rt;
-}
-
-BOOL threeDotsEnabled(void)
-{
-	BOOL rt = (preferences) ? [preferences[@"kDotsEnabled"] boolValue] : YES;
-	return rt;
-}
-
-unsigned int threeDotsPositioning(void)
-{
-	BOOL rt = (preferences) ? [preferences[@"kDotsPositioning"] integerValue] : 1;
-	return rt;
-}
-
-BOOL volumeSliderEnabledForMode0(void)
-{
-	return (preferences) ? [preferences[@"kVolumeSliderEnabledMode0"] boolValue] : NO;
-}
-
-BOOL volumeSliderEnabledForMode1(void)
-{
-	return (preferences) ? [preferences[@"kVolumeSliderEnabledMode1"] boolValue] : NO;
-}
-
-@interface SBDashBoardMediaArtworkViewController:UIViewController
-@end
-@interface MPUMediaRemoteControlsView:UIView
-@end
-@interface MPUMediaControlsVolumeView:UIView
-@end
-@interface MPULockScreenMediaControlsView : UIView
-- (void)refreshDisposition;
-@end
-@interface MPUChronologicalProgressView:UIView
-@end
-@interface MPUMediaControlsTitlesView:UIView
-@end
-@interface MPUNowPlayingArtworkView:UIView
-- (void)fakeSetFrame:(CGRect)frame;
-- (void)refreshDisposition;
-@end
-@interface MusicArtworkView:UIView
-@end
-@interface MPUTransportControlsView:UIView
-@end
-@interface NCNotificationListViewController:UICollectionViewController
-@end
-@interface SBMainScreenAlertWindowViewController:UIViewController
-@end
-@interface SBBacklightController : NSObject
-+ (instancetype)sharedInstance;
--(void)resetLockScreenIdleTimer;
-@end
-@interface MPUTransportControlMediaRemoteController:NSObject
-- (long long)likedState;
-@end
-@interface SBMediaController:NSObject
-+(id)sharedInstance;
--(BOOL)likeTrack;
--(BOOL)banTrack;
-- (id)_nowPlayingInfo;
--(BOOL)changeTrack:(int)arg1;
-- (BOOL)isPlaying;
-@end
+// preferences checks
+BOOL isEnabled(void){BOOL rt =  (preferences) ? [preferences[@"kEnabled"] boolValue] : YES;return rt;}
+BOOL threeDotsEnabled(void){BOOL rt = (preferences) ? [preferences[@"kDotsEnabled"] boolValue] : YES;return rt;}
+unsigned int threeDotsPositioning(void){BOOL rt = (preferences) ? [preferences[@"kDotsPositioning"] integerValue] : 1;return rt;}
+BOOL volumeSliderEnabledForMode0(void){return (preferences) ? [preferences[@"kVolumeSliderEnabledMode0"] boolValue] : NO;}
+BOOL volumeSliderEnabledForMode1(void){return (preferences) ? [preferences[@"kVolumeSliderEnabledMode1"] boolValue] : NO;}
+// --
 
 @interface AspectController : NSObject
 @property (nonatomic) BOOL notificationsPresent;
@@ -153,8 +91,6 @@ BOOL volumeSliderEnabledForMode1(void)
 	return privInst;
 }
 @end
-
-NCNotificationListViewController* notificationController = nil;
 
 static void LoadPreferences() {
     if (CFPreferencesAppSynchronize(applicationID)) {
@@ -215,13 +151,13 @@ void refreshNotificationStatus(){
 	}
 // ---
 
-	if(!isEnabled()){
+	if(!isEnabled()) {
 		__unused CGRect _frame = (isLockscreen) ? [AspectController sharedInstance].originalArtworkSize : frame;
 		%orig(_frame);
 		return;
 	}
 
-	if(isLockscreen){
+	if(isLockscreen) {
 		if(![AspectController sharedInstance].artwork) [AspectController sharedInstance].artwork = self;
 		CGRect rc = frame;
 		if([AspectController sharedInstance].notificationsPresent){
@@ -237,8 +173,8 @@ void refreshNotificationStatus(){
 			}
 			
 		}
-		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y){
-			return;}
+		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y)
+			return;
 		else {
 			[UIView animateWithDuration:.3f
                  animations:^(){
@@ -293,10 +229,17 @@ void refreshNotificationStatus(){
 		UIScrollView* scroll = MSHookIvar<UIScrollView *>(self, "_scrollView");
 		[button setImage:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Group" ofType:@"png"]] forState:UIControlStateNormal];
 		
-		CGRect dotsRect = (threeDotsPositioning()) ? 
-			 CGRectMake([UIScreen mainScreen].bounds.size.width*2-(48), [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f) :
-			 CGRectMake([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f);
-
+		CGRect dotsRect;
+		if(scroll.contentSize.width == [UIScreen mainScreen].bounds.size.width*3) { // Complete 3 screens
+			dotsRect = (threeDotsPositioning()) ? 
+				CGRectMake(([UIScreen mainScreen].bounds.size.width*2)-(48), [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f):
+				CGRectMake([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f);
+		}else {
+			dotsRect = (threeDotsPositioning()) ? 
+				CGRectMake(([UIScreen mainScreen].bounds.size.width)-(48), [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f):
+				CGRectMake(0, [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f);
+		}
+		
 		button.frame = dotsRect;
 		button.contentMode = UIViewContentModeBottom;
 		[scroll addSubview:button];
@@ -313,10 +256,6 @@ void refreshNotificationStatus(){
 	}else [AspectController sharedInstance].button.hidden = YES;}
 
 %end
-
-@interface MPUNowPlayingController:NSObject
--(BOOL)isPlaying;
-@end
 
 %hook MPULockScreenMediaControlsViewController
 
@@ -370,9 +309,7 @@ void refreshNotificationStatus(){
 }
 
 %new
-- (void)refreshDisposition{
-	[self layoutSubviews];
-}
+- (void)refreshDisposition{[self layoutSubviews];}
 
 -(void)layoutSubviews{
 	%orig;
@@ -503,7 +440,7 @@ void refreshNotificationStatus(){
 %end
 
 %hook SBDashBoardNotificationListViewController
--(void)loadView{
+-(void)loadView {
 	%orig();
 
     if (!isEnabled()) {
@@ -517,7 +454,7 @@ void refreshNotificationStatus(){
 %end
 
 %hook NCNotificationListViewController
--(void)collectionView:(id)arg1 performUpdatesAlongsideLayout:(id)arg2{
+-(void)collectionView:(id)arg1 performUpdatesAlongsideLayout:(id)arg2 {
 	%orig(arg1,arg2);
 
     if (!isEnabled()) {
@@ -527,11 +464,9 @@ void refreshNotificationStatus(){
         postNotificationName:@"refresh.lock"
         object:nil];
 }
-
 %end
 
 %hook MPUTransportControlMediaRemoteController
-
 -(void)_updateLikedState
 {
     %orig();
@@ -540,11 +475,10 @@ void refreshNotificationStatus(){
     	[[SharedHelper sharedInstance] notifyPaneOfSongStateUpdate];
     }
 }
-
 %end
 
 %hook SBBacklightController
--(void)_animateBacklightToFactor:(float)factor duration:(double)duration source:(int)source silently:(BOOL)silently completion:(id)completion{
+-(void)_animateBacklightToFactor:(float)factor duration:(double)duration source:(int)source silently:(BOOL)silently completion:(id)completion {
 	if(factor > 0){
 		%orig;
 	}else if(![SharedHelper sharedInstance].panelActive){
@@ -555,7 +489,7 @@ void refreshNotificationStatus(){
 %end
 
 %hook MPUNowPlayingMetadata
-- (BOOL)isMusicApp{
+- (BOOL)isMusicApp {
 	BOOL rt = %orig;
 	[SharedHelper sharedInstance].isMusicApp = rt;
 	return rt;
