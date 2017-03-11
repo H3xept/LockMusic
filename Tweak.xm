@@ -1,13 +1,11 @@
-#import <rocketbootstrap/rocketbootstrap.h>
+#include "LLIPC.h"
+#include "LLLog.h"
+
 #import "YoloViewController.h"
 #import "SharedHelper.h"
 #import "FakeInterfaces.h"
 
-#include "LLIPC.h"
-#include "LLLog.h"
-
 #ifdef __DBG__
-#define ASSERTALO assert(lllog_register_service("net.jndok.logserver") == 0)
 #define LOG(X) LLLogPrint((char*)X)
 #define FLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%f",X] UTF8String])
 #define BLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%d",X] UTF8String])
@@ -15,7 +13,6 @@
 #define FRLOG(X) LLLogPrint((char*)[[NSString stringWithFormat:@"%@",NSStringFromCGRect(X)] UTF8String])
 #else
 #define LOG(X)
-#define ASSERTALO
 #define FLOG(X)
 #define BLOG(X)
 #define FRLOG(X)
@@ -43,10 +40,12 @@ NCNotificationListViewController* notificationController = nil;
 
 static void LoadPreferences();
 
-%ctor{
+%ctor {
+#ifdef __DBG__
+    assert(lllog_register_service("net.jndok.logserver") == 0)
+#endif
 
-    ASSERTALO;
-	static dispatch_once_t onceToken;
+    static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
                                     NULL,
@@ -55,8 +54,8 @@ static void LoadPreferences();
 	                               	NULL,
 	                               	CFNotificationSuspensionBehaviorDeliverImmediately);
 	    });
+        
     LoadPreferences();
-
 }
 
 // preferences checks
@@ -170,7 +169,7 @@ void refreshNotificationStatus(){
 			}else if(IS_IPHONE_6P){
 				rc.origin.y -= frame.size.height/2 + 38;
 			}
-			
+
 		}
 		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y)
 			return;
@@ -227,18 +226,18 @@ void refreshNotificationStatus(){
 		UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
 		UIScrollView* scroll = MSHookIvar<UIScrollView *>(self, "_scrollView");
 		[button setImage:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Group" ofType:@"png"]] forState:UIControlStateNormal];
-		
+
 		CGRect dotsRect;
 		if(scroll.contentSize.width == [UIScreen mainScreen].bounds.size.width*3) { // Complete 3 screens
-			dotsRect = (threeDotsPositioning()) ? 
+			dotsRect = (threeDotsPositioning()) ?
 				CGRectMake(([UIScreen mainScreen].bounds.size.width*2)-(48), [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f):
 				CGRectMake([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f);
 		}else {
-			dotsRect = (threeDotsPositioning()) ? 
+			dotsRect = (threeDotsPositioning()) ?
 				CGRectMake(([UIScreen mainScreen].bounds.size.width)-(48), [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f):
 				CGRectMake(0, [UIScreen mainScreen].bounds.size.height-(24), 48.0f, 24.0f);
 		}
-		
+
 		button.frame = dotsRect;
 		button.contentMode = UIViewContentModeBottom;
 		[scroll addSubview:button];
@@ -385,7 +384,7 @@ void refreshNotificationStatus(){
 
 	if(newTitlesRect.origin.y == titlesView.frame.origin.y) return;
 
-	
+
 	[UIView setAnimationsEnabled:NO];
 
 	timeView.alpha = .0f;
