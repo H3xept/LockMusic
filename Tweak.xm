@@ -53,17 +53,17 @@ static void LoadPreferences();
 	                               	(__bridge CFStringRef)@"LockMusicPrefsChangedNotification",
 	                               	NULL,
 	                               	CFNotificationSuspensionBehaviorDeliverImmediately);
-	    });
-        
+                                });
+
     LoadPreferences();
 }
 
 // preferences checks
-BOOL isEnabled(void){BOOL rt =  (preferences) ? [preferences[@"kEnabled"] boolValue] : YES;return rt;}
-BOOL threeDotsEnabled(void){BOOL rt = (preferences) ? [preferences[@"kDotsEnabled"] boolValue] : YES;return rt;}
-unsigned int threeDotsPositioning(void){BOOL rt = (preferences) ? [preferences[@"kDotsPositioning"] integerValue] : 1;return rt;}
-BOOL volumeSliderEnabledForMode0(void){return (preferences) ? [preferences[@"kVolumeSliderEnabledMode0"] boolValue] : NO;}
-BOOL volumeSliderEnabledForMode1(void){return (preferences) ? [preferences[@"kVolumeSliderEnabledMode1"] boolValue] : NO;}
+BOOL isEnabled(void) {BOOL rt =  (preferences) ? [preferences[@"kEnabled"] boolValue] : YES;return rt;}
+BOOL threeDotsEnabled(void) {BOOL rt = (preferences) ? [preferences[@"kDotsEnabled"] boolValue] : YES;return rt;}
+unsigned int threeDotsPositioning(void) {BOOL rt = (preferences) ? [preferences[@"kDotsPositioning"] integerValue] : 1;return rt;}
+BOOL volumeSliderEnabledForMode0(void) {return (preferences) ? [preferences[@"kVolumeSliderEnabledMode0"] boolValue] : NO;}
+BOOL volumeSliderEnabledForMode1(void) {return (preferences) ? [preferences[@"kVolumeSliderEnabledMode1"] boolValue] : NO;}
 // --
 
 @interface AspectController : NSObject
@@ -80,9 +80,9 @@ BOOL volumeSliderEnabledForMode1(void){return (preferences) ? [preferences[@"kVo
 @end
 
 @implementation AspectController
-+ (instancetype)sharedInstance{
++ (instancetype)sharedInstance {
 	static AspectController* privInst = nil;
-	if(!privInst){
+	if(!privInst) {
 		privInst = [[AspectController alloc] init];
 		privInst.notificationsPresent = NO;
 	}
@@ -99,52 +99,53 @@ static void LoadPreferences() {
         }
     }
 
-	[[NSNotificationCenter defaultCenter]
-        postNotificationName:@"refresh.lock"
-        object:nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"refresh.lock" object:nil];
 }
 
-void refreshNotificationStatus(){
-	BOOL rt = NO;
-	if([notificationController collectionView:(UICollectionView*)notificationController numberOfItemsInSection:0])
-		rt = YES;
-	[AspectController sharedInstance].notificationsPresent = rt;
+void refreshNotificationStatus() {
+    BOOL rt = NO;
+    if([notificationController collectionView:(UICollectionView*)notificationController numberOfItemsInSection:0])
+        rt = YES;
+
+    [AspectController sharedInstance].notificationsPresent = rt;
 }
 
 %hook SBMainScreenAlertWindowViewController
--(void)loadView{
+
+-(void)loadView {
 	[AspectController sharedInstance].presentationVC = self;
 	%orig();
 }
+
 %end
 
 %hook MPUNowPlayingArtworkView
 
-- (void)layoutSubviews{
-	%orig;
-	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
-		if(![AspectController sharedInstance].artwork)[AspectController sharedInstance].artwork = self;
-	}
+-(void)layoutSubviews {
+    %orig;
+
+	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height)
+        if(![AspectController sharedInstance].artwork)
+            [AspectController sharedInstance].artwork = self;
 }
 
 %new
-- (void)fakeSetFrame:(CGRect)frame{
-	if(isEnabled()){
-		[UIView setAnimationsEnabled:NO];
-		[self setFrame:frame];
-		[UIView setAnimationsEnabled:YES];
+-(void)fakeSetFrame:(CGRect)frame {
+	if(isEnabled()) {
+        [UIView setAnimationsEnabled:NO];
+        [self setFrame:frame];
+        [UIView setAnimationsEnabled:YES];
 	}
 }
 
-- (void)setFrame:(CGRect)frame{
-
+-(void)setFrame:(CGRect)frame {
 	BOOL isLockscreen = self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height;
 
 // --- DISPATCH ONCE -- MUST BE EXECUTED
-	if(isLockscreen && frame.size.width > 0){
-	static dispatch_once_t onceTokenToGetOriginalFrameForArtwork;
-	dispatch_once(&onceTokenToGetOriginalFrameForArtwork, ^{
-    [AspectController sharedInstance].originalArtworkSize = frame;
+	if(isLockscreen && frame.size.width > 0) {
+        static dispatch_once_t onceTokenToGetOriginalFrameForArtwork;
+        dispatch_once(&onceTokenToGetOriginalFrameForArtwork, ^{
+            [AspectController sharedInstance].originalArtworkSize = frame;
 	    });
 	}
 // ---
@@ -156,73 +157,78 @@ void refreshNotificationStatus(){
 	}
 
 	if(isLockscreen) {
-		if(![AspectController sharedInstance].artwork) [AspectController sharedInstance].artwork = self;
-		CGRect rc = frame;
-		if([AspectController sharedInstance].notificationsPresent){
+		if(![AspectController sharedInstance].artwork)
+            [AspectController sharedInstance].artwork = self;
+
+        CGRect rc = frame;
+
+        if([AspectController sharedInstance].notificationsPresent) {
 			rc.origin = CGPointMake(20,40);
 			rc.size = CGSizeMake(120,120);
-		}else{
-			if(IS_IPHONE_5){
-				rc.origin.y -= frame.size.height/2 + 68;
-			}else if(IS_IPHONE_6){
-				rc.origin.y -= frame.size.height/2 + 38;
-			}else if(IS_IPHONE_6P){
-				rc.origin.y -= frame.size.height/2 + 38;
-			}
-
+		} else {
+            if(IS_IPHONE_5)
+                rc.origin.y -= frame.size.height/2 + 68;
+			else if(IS_IPHONE_6)
+                rc.origin.y -= frame.size.height/2 + 38;
+			else if(IS_IPHONE_6P)
+                rc.origin.y -= frame.size.height/2 + 38;
 		}
+
 		if([AspectController sharedInstance].previousArtworkRect.origin.y == rc.origin.y)
 			return;
 		else {
 			[UIView animateWithDuration:.3f
-                 animations:^(){
+                 animations:^() {
 					[UIView setAnimationsEnabled:NO];
 					%orig(rc);
 					[UIView setAnimationsEnabled:YES];
                  }
                  completion:nil];
 		}
+
 		[AspectController sharedInstance].previousArtworkRect = rc;
 		return;
 	}
-	if(frame.size.width != 0)
-		%orig(frame);
+
+    if(frame.size.width != 0)
+        %orig(frame);
 }
 
-- (void)setAlpha:(double)alpha{
-
+-(void)setAlpha:(double)alpha {
     if (!isEnabled()) {
         %orig(alpha);
         return;
     }
 
-	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height){
+	if(self.superview.frame.size.height == [UIScreen mainScreen].bounds.size.height) {
 		%orig(1.0);
 		return;
 	}
-	%orig(alpha);
+
+    %orig(alpha);
 }
+
 %end
 
 %hook SBDashBoardView
 
 %new
-- (void)musicButtonPressed{
-#define belloColor [UIColor colorWithRed:1.00 green:0.18 blue:0.33 alpha:1.0]
-	if([SharedHelper sharedInstance].isMusicApp){
-		YoloViewController* yoloVC = [[YoloViewController alloc] init];
-		[yoloVC setModalPresentationStyle:UIModalPresentationOverCurrentContext];
-		[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:yoloVC animated:NO completion:nil];
-		[SharedHelper sharedInstance].panelActive = YES;
+-(void)musicButtonPressed {
+	if([SharedHelper sharedInstance].isMusicApp) {
+        YoloViewController* yoloVC = [[YoloViewController alloc] init];
+        [yoloVC setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+        [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:yoloVC animated:NO completion:nil];
+        [SharedHelper sharedInstance].panelActive = YES;
 	}
 }
 
--(void)layoutSubviews{
+-(void)layoutSubviews {
 	%orig;
-    if (!isEnabled()) {
+
+    if (!isEnabled())
         return;
-    }
-    if(![AspectController sharedInstance].button.superview && threeDotsEnabled()){
+
+    if(![AspectController sharedInstance].button.superview && threeDotsEnabled()) {
 		UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
 		UIScrollView* scroll = MSHookIvar<UIScrollView *>(self, "_scrollView");
 		[button setImage:[[UIImage alloc] initWithContentsOfFile:[[[NSBundle alloc] initWithPath:BUNDLEPATH] pathForResource:@"Group" ofType:@"png"]] forState:UIControlStateNormal];
@@ -247,67 +253,68 @@ void refreshNotificationStatus(){
 		[AspectController sharedInstance].button = button;
 	}
 
-	if([[objc_getClass("SBMediaController") sharedInstance] isPlaying]){
-		if([SharedHelper sharedInstance].isMusicApp){
-			[AspectController sharedInstance].button.hidden = NO;
-		}else [AspectController sharedInstance].button.hidden = YES;
-	}else [AspectController sharedInstance].button.hidden = YES;}
+	if([[objc_getClass("SBMediaController") sharedInstance] isPlaying]) {
+        if([SharedHelper sharedInstance].isMusicApp) {
+            [AspectController sharedInstance].button.hidden = NO;
+		} else [AspectController sharedInstance].button.hidden = YES;
+	} else [AspectController sharedInstance].button.hidden = YES;}
 
 %end
 
 %hook MPULockScreenMediaControlsViewController
 
-- (void)viewWillAppear:(BOOL)animated {
+-(void)viewWillAppear:(BOOL)animated {
 	%orig(animated);
-    if (!isEnabled()) {
-        return;
-    }
 
-	if([[objc_getClass("SBMediaController") sharedInstance] isPlaying]){
-		if([SharedHelper sharedInstance].isMusicApp){
-			[AspectController sharedInstance].button.hidden = NO;
-		}else [AspectController sharedInstance].button.hidden = YES;
-	}else [AspectController sharedInstance].button.hidden = YES;
+    if (!isEnabled())
+        return;
+
+	if([[objc_getClass("SBMediaController") sharedInstance] isPlaying]) {
+		if([SharedHelper sharedInstance].isMusicApp) {
+            [AspectController sharedInstance].button.hidden = NO;
+		} else [AspectController sharedInstance].button.hidden = YES;
+	} else [AspectController sharedInstance].button.hidden = YES;
 
 	[UIView setAnimationsEnabled:NO];
 	[[AspectController sharedInstance].artwork setFrame:[AspectController sharedInstance].originalArtworkSize];
 	[UIView setAnimationsEnabled:YES];
 }
 
--(void)nowPlayingController:(id)arg1 playbackStateDidChange:(BOOL)arg2{
+-(void)nowPlayingController:(id)arg1 playbackStateDidChange:(BOOL)arg2 {
 	%orig(arg1,arg2);
 
-    if (!isEnabled()) {
+    if (!isEnabled())
         return;
-    }
 
-	if(arg2){
-		if([SharedHelper sharedInstance].isMusicApp){
-			[AspectController sharedInstance].button.hidden = NO;
-		}else [AspectController sharedInstance].button.hidden = YES;
-	}else [AspectController sharedInstance].button.hidden = YES;
+	if(arg2) {
+        if([SharedHelper sharedInstance].isMusicApp) {
+            [AspectController sharedInstance].button.hidden = NO;
+		} else [AspectController sharedInstance].button.hidden = YES;
+	} else [AspectController sharedInstance].button.hidden = YES;
 
 }
 %end
 
 %hook MPULockScreenMediaControlsView
 
-- (instancetype)init{
+-(instancetype)init {
 	id rt = %orig();
 
-    if (!isEnabled()) {
+    if (!isEnabled())
         return rt;
-    }
 
 	[[NSNotificationCenter defaultCenter] addObserver:rt
 	        selector:@selector(refreshDisposition)
 	        name:@"refresh.lock"
 	        object:nil];
+
 	return rt;
 }
 
 %new
-- (void)refreshDisposition{[self layoutSubviews];}
+-(void)refreshDisposition{
+    [self layoutSubviews];
+}
 
 -(void)layoutSubviews{
 	%orig;
@@ -339,12 +346,12 @@ void refreshNotificationStatus(){
 	double volumeScreenHeightDelta = (volumeSliderEnabledForMode0()) ? -156+volumeModifier:.0f;
 	double controlsVolumeModifier = (volumeSliderEnabledForMode0()) ? 18.0f:.0f;
 
-	if([AspectController sharedInstance].notificationsPresent){
+	if([AspectController sharedInstance].notificationsPresent) {
 		[UIView setAnimationsEnabled:NO];
 		volumeView.alpha = (volumeSliderEnabledForMode1()) ? 1.0f:.0f;
 		[UIView setAnimationsEnabled:YES];
 
-		if(IS_IPHONE_5){
+		if(IS_IPHONE_5) {
 			newVolumeRect.origin.y = volumeModifier+144;
 			newTimeRect.origin.y = 154;
 		}else{
@@ -468,7 +475,7 @@ void refreshNotificationStatus(){
 -(void)_updateLikedState
 {
     %orig();
-    if([self likedState] != [SharedHelper sharedInstance].songState){
+    if([self likedState] != [SharedHelper sharedInstance].songState) {
     	[SharedHelper sharedInstance].songState = [self likedState];
     	[[SharedHelper sharedInstance] notifyPaneOfSongStateUpdate];
     }
@@ -477,9 +484,9 @@ void refreshNotificationStatus(){
 
 %hook SBBacklightController
 -(void)_animateBacklightToFactor:(float)factor duration:(double)duration source:(int)source silently:(BOOL)silently completion:(id)completion {
-	if(factor > 0){
+	if(factor > 0) {
 		%orig;
-	}else if(![SharedHelper sharedInstance].panelActive){
+	}else if(![SharedHelper sharedInstance].panelActive) {
 		[AspectController sharedInstance].button.hidden = YES;
 		%orig;
 	}
