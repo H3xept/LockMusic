@@ -260,6 +260,11 @@ void refreshNotificationStatus(){
 
 - (void)viewWillAppear:(BOOL)animated {
 	%orig(animated);
+
+	[UIView setAnimationsEnabled:NO];
+	[[AspectController sharedInstance].artwork setFrame:[AspectController sharedInstance].originalArtworkSize];
+	[UIView setAnimationsEnabled:YES];
+
     if (!isEnabled()) {
         return;
     }
@@ -270,9 +275,6 @@ void refreshNotificationStatus(){
 		}else [AspectController sharedInstance].button.hidden = YES;
 	}else [AspectController sharedInstance].button.hidden = YES;
 
-	[UIView setAnimationsEnabled:NO];
-	[[AspectController sharedInstance].artwork setFrame:[AspectController sharedInstance].originalArtworkSize];
-	[UIView setAnimationsEnabled:YES];
 }
 
 -(void)nowPlayingController:(id)arg1 playbackStateDidChange:(BOOL)arg2{
