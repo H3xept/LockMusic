@@ -34,27 +34,6 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-			<key>footerCellClass</key>
-			<string>NoNotificationsCell</string>
-			<key>label</key>
-			<string>Style for lockscreen without notifications</string>
-		</dict>
-<!-- 		<dict>
-			<key>bundle</key>
-			<string>lockmusicprefs</string>
-			<key>cell</key>
-			<string>PSLinkCell</string>
-			<key>detail</key>
-			<string>NoNotifications</string>
-			<key>isController</key>
-			<true/>
-			<key>label</key>
-			<string>No notifications</string>
-		</dict> -->
-
-		<dict>
-			<key>cell</key>
-			<string>PSGroupCell</string>
 			<key>label</key>
 			<string>Volume Controls</string>
 		</dict>
@@ -151,6 +130,15 @@
 			<key>action</key><string>ideaToNopteam</string>
 			<key>defaults</key><string>com.fl00d.lockmusicprefs</string>
 			<key>label</key><string>Any ideas? 💡</string>
+		</dict>
+		<dict>
+           <key>cell</key>
+            <key>detail</key>
+            <string>Coddio</string>
+            <key>key</key>
+            <string>animation_image</string>
+            <key>label</key>
+            <string>Pages</string>
 		</dict>
 	</array>
 	<key>title</key>

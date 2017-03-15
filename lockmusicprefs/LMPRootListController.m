@@ -1,8 +1,28 @@
 #include "LMPRootListController.h"
 #import <MessageUI/MessageUI.h>
 
+@implementation NoNotifications
+@end
+
+
 @class PSTableCell;
-@interface LockMusicHeaderCell : PSTableCell{
+
+@interface NoNotificationsCell : PSTableCell {}
+@end
+@implementation NoNotificationsCell
+- (id)initWithSpecifier:(PSSpecifier *)specifier{
+    self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"footerCell" specifier:specifier];
+    if (self) {
+    	self.backgroundColor = [UIColor whiteColor];
+    }
+    return self;
+}
+- (CGFloat)preferredHeightForWidth:(CGFloat)arg1{
+	return 80;
+}
+@end
+
+@interface LockMusicHeaderCell : PSTableCell {
 	UIImageView *_background;
 }
 @end

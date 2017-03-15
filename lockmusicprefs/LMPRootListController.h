@@ -6,3 +6,6 @@
 - (void)bugToNopteam;
 - (void)ideaToNopteam;
 @end
+
+@interface NoNotifications : PSListController
+@end
