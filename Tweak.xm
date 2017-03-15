@@ -6,6 +6,8 @@
 #include "LLIPC.h"
 #include "LLLog.h"
 
+#define __DBG__
+
 #ifdef __DBG__
 #define ASSERTALO assert(lllog_register_service("net.jndok.logserver") == 0)
 #define LOG(X) LLLogPrint((char*)X)
@@ -66,6 +68,7 @@ unsigned int threeDotsPositioning(void){BOOL rt = (preferences) ? [preferences[@
 BOOL volumeSliderEnabledForMode0(void){return (preferences) ? [preferences[@"kVolumeSliderEnabledMode0"] boolValue] : NO;}
 BOOL volumeSliderEnabledForMode1(void){return (preferences) ? [preferences[@"kVolumeSliderEnabledMode1"] boolValue] : NO;}
 unsigned int styleForNoNotification(void){return (preferences) ? [preferences[@"kNoNotificationStyle"] integerValue] : 1;}
+unsigned int styleForNotification(void){return (preferences) ? [preferences[@"kNotificationStyle"] integerValue] : 1;}
 // --
 
 @interface AspectController : NSObject
@@ -322,6 +325,41 @@ void refreshNotificationStatus(){
         return;
     }
 
+    BOOL fakeNotificationPresent = NO;;
+    __unused unsigned int style = 1;
+  //   if([AspectController sharedInstance].notificationsPresent){
+  //   	LOG("NOTIFICATION");
+  //   	style = styleForNotification();
+  //   	BLOG(style);
+		// switch(style) {
+		// 	case 0: //Default
+		// 		return;
+		// 		break;
+		// 	case 1: //LockMusic - Default
+		// 		break;
+		// 	default:
+		// 		break;
+		// }
+
+  //   }else{
+  //   	LOG("NO NOTIFICATION");
+	 //    style = styleForNoNotification();
+	 //    BLOG(style);
+
+		// switch(style) {
+		// 	case 0: //Default
+		// 		return;
+		// 		break;
+		// 	case 1: //LockMusic - Default
+		// 		break;
+		// 	case 2: //LockMusic - Shrunk
+		// 		fakeNotificationPresent = YES;
+		// 		break;
+		// 	default:
+		// 		break;
+		// }
+  //   }
+
 	refreshNotificationStatus();
 
 	UIView* volumeView = MSHookIvar<MPUMediaControlsVolumeView *>(self, "_volumeView");
@@ -344,6 +382,7 @@ void refreshNotificationStatus(){
 	double controlsVolumeModifier = (volumeSliderEnabledForMode0()) ? 18.0f:.0f;
 
 	if([AspectController sharedInstance].notificationsPresent){
+fakeNotificationPresent_:
 		[UIView setAnimationsEnabled:NO];
 		volumeView.alpha = (volumeSliderEnabledForMode1()) ? 1.0f:.0f;
 		[UIView setAnimationsEnabled:YES];
@@ -362,6 +401,7 @@ void refreshNotificationStatus(){
 		newControlsRect.size.width = newTitlesRect.size.width-20;
 		newControlsRect.origin.x = [UIScreen mainScreen].bounds.size.width-(newTitlesRect.size.width/2 + newControlsRect.size.width/2 + 30+5);
 	}else{
+		if(fakeNotificationPresent) goto fakeNotificationPresent_;
 		[UIView setAnimationsEnabled:NO];
 		volumeView.alpha = (volumeSliderEnabledForMode0()) ? 1.0f:.0f;
 		[UIView setAnimationsEnabled:YES];
@@ -371,6 +411,7 @@ void refreshNotificationStatus(){
 		newControlsRect.origin.y = [UIScreen mainScreen].bounds.size.height-(150+controlsVolumeModifier);
 		newVolumeRect.origin.y = [UIScreen mainScreen].bounds.size.height+volumeScreenHeightDelta;
 	}
+
 
 	//Setup
 	timeView.frame = (aspect.previousTimeRect.size.width) ? aspect.previousTimeRect : timeView.frame;
@@ -408,7 +449,6 @@ void refreshNotificationStatus(){
 	titlesView.alpha = 1.0f;
 	if(([AspectController sharedInstance].notificationsPresent && volumeSliderEnabledForMode1()) || (![AspectController sharedInstance].notificationsPresent && volumeSliderEnabledForMode0()))
 		volumeView.alpha = 1.0f;
-
 
 }
 

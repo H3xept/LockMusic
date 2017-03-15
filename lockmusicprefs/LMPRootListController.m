@@ -10,6 +10,24 @@ static CFStringRef applicationID = (__bridge CFStringRef)@"com.fl00d.lockmusicpr
 
 @class PSTableCell;
 
+void changeStyle(void) {
+	[[NSNotificationCenter defaultCenter]
+        postNotificationName:@"LockMusicInternalChangedStyle"
+        object:nil];
+}
+
+unsigned int retrieveStyle(NSString* key) {
+	unsigned int rt = 0;
+    if (CFPreferencesAppSynchronize(applicationID)) {
+        CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+        if (keyList) {
+            rt = [(NSNumber*)CFPreferencesCopyValue((__bridge CFStringRef)key, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost) integerValue];
+            CFRelease(keyList);
+        }
+    }
+    return rt;
+}
+
 @interface NoNotificationsCell : PSTableCell {
 	UIImageView *_styleImage;
 }
@@ -17,23 +35,6 @@ static CFStringRef applicationID = (__bridge CFStringRef)@"com.fl00d.lockmusicpr
 - (void)receivedRefreshNotification;
 @end
 
-void changeStyle(void) {
-	[[NSNotificationCenter defaultCenter]
-        postNotificationName:@"LockMusicInternalChangedStyle"
-        object:nil];
-}
-
-unsigned int retrieveStyle(void) {
-	unsigned int rt = 0;
-    if (CFPreferencesAppSynchronize(applicationID)) {
-        CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-        if (keyList) {
-            rt = [(NSNumber*)CFPreferencesCopyValue((__bridge CFStringRef)@"kNoNotificationStyle", applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost) integerValue];
-            CFRelease(keyList);
-        }
-    }
-    return rt;
-}
 
 @implementation NoNotificationsCell
 - (id)initWithSpecifier:(PSSpecifier *)specifier{
@@ -43,7 +44,7 @@ unsigned int retrieveStyle(void) {
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
                                     NULL,
 	                              	(CFNotificationCallback)changeStyle,
-	                               	(__bridge CFStringRef)@"LockMusicInternalChangedStyle",
+	                               	(__bridge CFStringRef)@"LockMusicPrefsChangedNotification",
 	                               	NULL,
 	                               	CFNotificationSuspensionBehaviorDeliverImmediately);
 	    });
@@ -56,7 +57,7 @@ unsigned int retrieveStyle(void) {
     self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"footerCell" specifier:specifier];
     if (self) {
     	self->_styleImage = [[UIImageView alloc] initWithFrame:CGRectMake(0,0,95,194)];
-    	[self setupWithStyle:retrieveStyle()];
+    	[self setupWithStyle:retrieveStyle(@"kNoNotificationStyle")];
     	self.backgroundColor = [UIColor whiteColor];
     	[self addSubview:self->_styleImage];
     }
@@ -64,7 +65,7 @@ unsigned int retrieveStyle(void) {
 }
 
 - (void)receivedRefreshNotification {
-	unsigned int style = retrieveStyle();
+	unsigned int style = retrieveStyle(@"kNoNotificationStyle");
     [self setupWithStyle:style];
 }
 
@@ -78,6 +79,74 @@ unsigned int retrieveStyle(void) {
 			break;
 		case 2: //LockMusic - Shrunk
 			self->_styleImage.image = imageShort(@"NoNotification_2",@"png");
+			break;
+		case 3: // Custom
+			self->_styleImage.image = imageShort(@"Custom",@"png");
+			break;
+	}
+}
+
+- (void)drawRect:(CGRect)frame {
+	CGRect nFrame = self->_styleImage.frame;
+	nFrame.origin.x = frame.size.width/2 - nFrame.size.width/2;
+	self->_styleImage.frame = nFrame;
+}
+
+- (CGFloat)preferredHeightForWidth:(CGFloat)arg1{
+	return 202;
+}
+
+@end
+
+
+@interface NotificationsCell : PSTableCell {
+	UIImageView *_styleImage;
+}
+- (void)setupWithStyle:(unsigned int)style;
+- (void)receivedRefreshNotification;
+@end
+
+
+@implementation NotificationsCell
+- (id)initWithSpecifier:(PSSpecifier *)specifier{
+
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
+                                    NULL,
+	                              	(CFNotificationCallback)changeStyle,
+	                               	(__bridge CFStringRef)@"LockMusicPrefsChangedNotification",
+	                               	NULL,
+	                               	CFNotificationSuspensionBehaviorDeliverImmediately);
+	    });
+
+	[[NSNotificationCenter defaultCenter] addObserver:self
+	        selector:@selector(receivedRefreshNotification)
+	        name:@"LockMusicInternalChangedStyle"
+	        object:nil];
+
+    self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"footerCell" specifier:specifier];
+    if (self) {
+    	self->_styleImage = [[UIImageView alloc] initWithFrame:CGRectMake(0,0,95,194)];
+    	[self setupWithStyle:retrieveStyle(@"kNotificationStyle")];
+    	self.backgroundColor = [UIColor whiteColor];
+    	[self addSubview:self->_styleImage];
+    }
+    return self;
+}
+
+- (void)receivedRefreshNotification {
+	unsigned int style = retrieveStyle(@"kNotificationStyle");
+    [self setupWithStyle:style];
+}
+
+- (void)setupWithStyle:(unsigned int)style {
+	switch(style) {
+		case 0: //Default
+			self->_styleImage.image = imageShort(@"Notification_Default",@"png");
+			break;
+		case 1: //LockMusic - Default
+			self->_styleImage.image = imageShort(@"Notification_1",@"png");
 			break;
 		case 3: // Custom
 			self->_styleImage.image = imageShort(@"Custom",@"png");
