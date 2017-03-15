@@ -65,6 +65,7 @@ BOOL threeDotsEnabled(void){BOOL rt = (preferences) ? [preferences[@"kDotsEnable
 unsigned int threeDotsPositioning(void){BOOL rt = (preferences) ? [preferences[@"kDotsPositioning"] integerValue] : 1;return rt;}
 BOOL volumeSliderEnabledForMode0(void){return (preferences) ? [preferences[@"kVolumeSliderEnabledMode0"] boolValue] : NO;}
 BOOL volumeSliderEnabledForMode1(void){return (preferences) ? [preferences[@"kVolumeSliderEnabledMode1"] boolValue] : NO;}
+unsigned int styleForNoNotification(void){return (preferences) ? [preferences[@"kNoNotificationStyle"] integerValue] : 1;}
 // --
 
 @interface AspectController : NSObject
